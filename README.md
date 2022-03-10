@@ -8,18 +8,24 @@ Workflows needs to run in a specific conda environment which needs to be install
 Parsl needs to access at least two remote executor ports.  The script `tunnels.py` was developed to establish the port connection.
 
 ```
-    config = Config(
-        executors=[
-            HighThroughputExecutor(
-                worker_ports = (worker_ports),
-                label = 'parsl-cluster',
-                worker_debug = True,             # Default False for shorter logs
-                cores_per_worker = int(4),     # One worker per node
-                worker_logdir_root = args['remote_dir'], #os.getcwd() + '/parsllogs',
-                provider = local_provider
-            )
-        ]
-    )
+# Create tunnel for worker ports
+worker_ports = (55233, 52234)
+parsl_utils.tunnels.set_up_worker_ssh_tunnel(host, ports = list(worker_ports))
+```
+
+```
+config = Config(
+    executors=[
+        HighThroughputExecutor(
+            worker_ports = (worker_ports),
+            label = 'parsl-cluster',
+            worker_debug = True,             # Default False for shorter logs
+            cores_per_worker = int(4),     # One worker per node
+            worker_logdir_root = args['remote_dir'], #os.getcwd() + '/parsllogs',
+            provider = local_provider
+        )
+    ]
+)
 ```
 
 ### 3. Staging:
