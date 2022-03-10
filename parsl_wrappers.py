@@ -64,25 +64,3 @@ def log_app(func):
         return func(*args, **kwargs)
 
     return wrapper
-
-
-@log_app
-@stage_app('hooost')
-def hello(cmd, inputs = [], outputs = [], inputs_dict = {}, outputs_dict = {}):
-    print(cmd)
-    print(inputs)
-    print(outputs)
-    return 0
-
-
-#host = 'host'
-
-if __name__ == '__main__':
-    inputs_dict = {
-        'type': 'file',
-        'origin': 'lala',
-        'destination': 'lolo'
-    }
-
-    out = hello('echo hello', inputs_dict = inputs_dict, outputs_dict = inputs_dict)
-    print(out)
