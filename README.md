@@ -6,7 +6,8 @@ Workflows needs to run in a specific conda environment which needs to be install
 1. Support one native parsl environment (install it in every user container) and ship it to the head node if required).
 2. Support bringing and sharing your own conda environment(s)
 3. Include an install.sh script with every workflow that creates its own conda environment
-In each case, the conda environment would need to be sent to or installed in the head node. This could be done as part of the main_wrapper.sh.
+
+In each case above, the conda environment would need to be sent to or installed in the head node. This could be done as part of the main_wrapper.sh.
 
 ### 2. Tunnels for the worker ports:
 Parsl needs to access at least two remote executor ports.  The script `tunnels.py` was developed to establish the port connection.
