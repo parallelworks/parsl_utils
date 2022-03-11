@@ -10,7 +10,7 @@ Workflows needs to run in a specific conda environment which needs to be install
 In each case above, the conda environment would need to be sent to or installed in the head node. This could be done as part of the `main_wrapper.sh`.
 
 ### 2. Tunnels for the worker ports:
-Parsl needs to access at least two remote executor ports.  The script `tunnels.py` was developed to establish the port connection.
+Parsl needs to access at least two remote executor ports. SSH tunnels are created by the `main_wrapper.sh` scripts. The script searches for available ports, establishes the tunnels before running the workflow and cancels the tunnels after running the workflow.
 
 ```
 # Create tunnel for worker ports
@@ -32,8 +32,6 @@ config = Config(
     ]
 )
 ```
-
-TODO: (1) Develop code to find a free pair of ports. (2) Remove tunnel when job is done.
 
 ### 3. Staging:
 I have not been able to use a data provider available in native parsl. Note that if we were to develop our own data providers we would need to address how to integrate this into the native/official parsl distributions. Therefore, the script `parsl_wrappers.py` and `staging.py` were developed to handle inputs and outputs before and after the app runs, respectively, using a function decorator. An example is shown below:
