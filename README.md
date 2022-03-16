@@ -2,12 +2,12 @@
 This repo contains helper scripts for running native/official Parsl in cluster pools on the PW platform. These scripts are considered temporary ad-hoc code that should be better integrated on the platform and were develeped to temporarily address the issues below:
 
 ### 1. Conda Environment:
-Workflows needs to run in a specific conda environment which needs to be installed and accessible on the user container and on the head node of the cluster. The scripts `main_wrapper.py` and `main_wrapper.sh` are used to activate the environment on the PW platform before running the workflow. The `workflow.xml` executes the python wrapper `<command interpreter='parsl'>main_wrapper.py</command>` using the parsl interpreter that executes python in the default conda environment. The `main_wrapper.py` script redirects the arguments to the `main_wrapper.sh` script that activates the right conda environment and checks that it is installed and available on the user container and on the head node of the cluster. The `main_wrapper.py` could be avoided with a `bash` workflow interpreter. To solve this obstacle I see three options:
+Workflows needs to run in a specific conda environment which needs to be installed and accessible on the user container and on the head node of the cluster. The scripts `main_wrapper.py` and `main_wrapper.sh` are used to activate the environment on the PW platform before running the workflow. The scripts `check_install_local.sh` and `check_install_remote.sh` are used to verify or install the right environment in the and remote machines, respetively. The `workflow.xml` executes the python wrapper `<command interpreter='parsl'>main_wrapper.py</command>` using the parsl interpreter that executes python in the default conda environment. The `main_wrapper.py` script redirects the arguments to the `main_wrapper.sh` script that activates the right conda environment and checks that it is installed and available on the user container and on the head node of the cluster. The `main_wrapper.py` could be avoided with a `bash` workflow interpreter. To solve this obstacle I see three options:
 1. Support one native parsl environment (install it in every user container) and ship it to the head node if required).
 2. Support bringing and sharing your own conda environment(s)
-3. Include an install.sh script with every workflow that creates its own conda environment
+3. Include an install.sh script with every workflow that creates its own conda environment. This is option is implemented now in the `check_install_*.sh` scripts.
 
-In each case above, the conda environment would need to be sent to or installed in the head node. This could be done as part of the `main_wrapper.sh`.
+In each case above, the conda environment would need to be sent to or installed in the head node.
 
 ### 2. Tunnels for the worker ports:
 Parsl needs to access at least two remote executor ports. SSH tunnels are created by the `main_wrapper.sh` scripts. The script searches for available ports, establishes the tunnels before running the workflow and cancels the tunnels after running the workflow.
