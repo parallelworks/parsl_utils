@@ -6,6 +6,7 @@ pudir=$(dirname $0)
 #        Users need to be able to decide which python environment is needed by their workflows!
 # FIXME: Need to stage correct python environment to remote VM
 
+# This is needed for SSHChannel in Parsl
 ssh-keygen -f "/home/${PW_USER}/.ssh/known_hosts" -R ${HOST_IP}
 
 LOCAL_CONDA_ENV="parsl_py39"
@@ -13,7 +14,7 @@ LOCAL_CONDA_SH="/pw/.miniconda3/etc/profile.d/conda.sh"
 
 export REMOTE_CONDA_ENV="parsl_py39"
 export REMOTE_CONDA_DIR="/contrib/${PW_USER}/miniconda3"
-export REMOTE_CONDA_DIR="/tmp/${PW_USER}/miniconda3" # Used for testing!
+#export REMOTE_CONDA_DIR="/tmp/${PW_USER}/miniconda3" # Used for testing!
 export REMOTE_CONDA_SH="${REMOTE_CONDA_DIR}/etc/profile.d/conda.sh"
 
 # Activate or install and activate conda environment in user container
