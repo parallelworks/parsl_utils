@@ -6,39 +6,23 @@ pudir=$(dirname $0)
 #        Users need to be able to decide which python environment is needed by their workflows!
 # FIXME: Need to stage correct python environment to remote VM
 
-# TODO: Move tunnel creation/destruction here
+ssh-keygen -f "/home/${PW_USER}/.ssh/known_hosts" -R ${HOST_IP}
 
-local_conda_env="parsl_py39"
-local_conda_sh="/pw/.miniconda3/etc/profile.d/conda.sh"
+LOCAL_CONDA_ENV="parsl_py39"
+LOCAL_CONDA_SH="/pw/.miniconda3/etc/profile.d/conda.sh"
 
 export REMOTE_CONDA_ENV="parsl_py39"
-export REMOTE_CONDA_SH="/contrib/${PW_USER}/miniconda3/etc/profile.d/conda.sh"
+export REMOTE_CONDA_DIR="/contrib/${PW_USER}/miniconda3"
+export REMOTE_CONDA_DIR="/tmp/${PW_USER}/miniconda3" # Used for testing!
+export REMOTE_CONDA_SH="${REMOTE_CONDA_DIR}/etc/profile.d/conda.sh"
 
+# Activate or install and activate conda environment in user container
+bash ${pudir}/check_install_local.sh ${LOCAL_CONDA_SH} ${LOCAL_CONDA_ENV}
+source ${LOCAL_CONDA_SH}
+conda activate ${LOCAL_CONDA_ENV}
 
-# Activate conda environment in user container
-{
-    source ${local_conda_sh}
-    conda activate ${local_conda_env}
-} || {
-    "Conda environment ${local_conda_env} not found"
-    exit 0
-}
-
-# Check remote conda environment
-echo "source ${REMOTE_CONDA_SH}" > check_remote_conda.sh
-echo "conda activate ${REMOTE_CONDA_ENV}" >> check_remote_conda.sh
-{
-    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${HOST_IP} 'bash -s' < check_remote_conda.sh
-} || {
-    echo Remote conda environment not found:
-    echo     CONDA SH:  ${REMOTE_CONDA_SH}
-    echo     CONDA ENV: ${REMOTE_CONDA_ENV}
-    echo See install instructions below:
-    echo "Install miniconda under /contrib/${PW_USER}/miniconda3 https://docs.conda.io/en/latest/miniconda.html"
-    echo "Run: conda create --name parsl_py39 python=3.9; pip install parsl==1.1.0"
-    exit 0
-}
-
+# Activate or install and activate conda environment in remote machine
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${HOST_IP} 'bash -s' < ${pudir}/check_install_remote.sh ${REMOTE_CONDA_DIR} ${REMOTE_CONDA_SH} ${REMOTE_CONDA_ENV}
 
 # Establish SSH tunnel on available ports for parsl worker
 port_pair=$(find_available_port_pair)
@@ -60,6 +44,7 @@ pkill -P $$
 # Make super sure python process dies:
 python_pid=$(ps -x | grep  ${worker_port_1} | grep python | awk '{print $1}')
 if ! [ -z "${python_pid}" ]; then
+    echo "Killing remaining python process ${python_pid}"
     pkill -p ${python_pid}
     kill ${python_pid}
 fi
