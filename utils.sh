@@ -27,8 +27,9 @@ find_available_port_pair () {
 }
 
 ssh_establish_tunnel_to_head_node() {
-    port_1=$1
-    port_2=$2
+    HOST_IP=$1
+    port_1=$2
+    port_2=$3
     int_ip=$(hostname -I | sed "s/ //g")
     u=${PW_USER}
     s=${PW_USER_HOST}
@@ -38,8 +39,9 @@ ssh_establish_tunnel_to_head_node() {
 }
 
 ssh_cancel_tunnel_to_head_node() {
-    port_1=$1
-    port_2=$2
+    HOST_IP=$1
+    port_1=$2
+    port_2=$3
     int_ip=$(hostname -I | sed "s/ //g")
     u=${PW_USER}
     s=${PW_USER_HOST}

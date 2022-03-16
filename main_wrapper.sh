@@ -29,22 +29,25 @@ ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${HOST_IP} 'bash
 port_pair=$(find_available_port_pair)
 worker_port_1=$(echo ${port_pair} | cut -d' ' -f1)
 worker_port_2=$(echo ${port_pair} | cut -d' ' -f2)
-ssh_establish_tunnel_to_head_node ${worker_port_1} ${worker_port_2}
+ssh_establish_tunnel_to_head_node ${HOST_IP} ${worker_port_1} ${worker_port_2}
 
-$@ --worker_port_1 ${worker_port_1} --worker_port_2 ${worker_port_2}
+# Submit Parsl JOB:
+job_id=$(date +%s)-${RANDOM}-${RANDOM}
+$@ --worker_port_1 ${worker_port_1} --worker_port_2 ${worker_port_2} --job_id ${job_id}
 ec=$?
 main_pid=$!
 
 # Cancel tunnel on the remote side only
-ssh_cancel_tunnel_to_head_node ${worker_port_1} ${worker_port_2}
+ssh_cancel_tunnel_to_head_node ${HOST_IP} ${worker_port_1} ${worker_port_2}
 
 # Kill all descendant processes
 pkill -P ${main_pid}
 pkill -P $$
 
 # Make super sure python process dies:
-python_pid=$(ps -x | grep  ${worker_port_1} | grep python | awk '{print $1}')
+python_pid=$(ps -x | grep  ${job_id} | grep python | awk '{print $1}')
 if ! [ -z "${python_pid}" ]; then
+    echo
     echo "Killing remaining python process ${python_pid}"
     pkill -p ${python_pid}
     kill ${python_pid}
