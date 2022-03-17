@@ -65,3 +65,65 @@ inputs_dict = {
 ```
 
 The type can be a file or a directory. The global path points to the place where the data resides. Use pw, gs, and s3 for the pw user container, google bucket and s3 storage, respectively. The placeholder `{cwd}` is replaced by the path to the job directory (`/pw/jobs/job_number`). The worker path points to the place where the data is staged in the worker. All paths must be absolute.
+
+
+### 3. Multihost:
+The resource definition section for workflows is very outdated on the platform. For multihost Parsl this section should associate the labels in the executors of the Parsl configuration to the names of the pools and to certain pool properties or specifications (location of the conda environment in the remote host, number of cores, directory for parsl logs, pool ports, etc). For now, this is resolved with the `executors.json` file. An example of this file is pasted below:
+
+```
+{
+    "myexecutor_1": {
+        "POOL": "gcpclustergen2",
+        "REMOTE_CONDA_ENV": "parsl_py39",
+        "REMOTE_CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
+        "RUN_DIR": "/contrib/Alvaro.Vidal/tmp",
+        "WORKER_LOGDIR_ROOT": "/contrib/Alvaro.Vidal/tmp",
+        "SSH_CHANNEL_SCRIPT_DIR": "/contrib/Alvaro.Vidal/tmp",
+        "CORES_PER_WORKER": 4
+    },
+    "myexecutor_2": {
+        "POOL": "gcpcluster",
+        "REMOTE_CONDA_ENV": "parsl_py39",
+        "REMOTE_CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
+        "RUN_DIR": "/contrib/Alvaro.Vidal/tmp",
+        "WORKER_LOGDIR_ROOT": "/contrib/Alvaro.Vidal/tmp",
+        "SSH_CHANNEL_SCRIPT_DIR": "/contrib/Alvaro.Vidal/tmp",
+        "CORES_PER_WORKER": 4
+    }
+}
+```
+
+The label is the top level key of the JSON. The script `parsl_utils/complete_exec_conf.py` completes the configuration by adding the IP address and worker ports of the host, for example:
+
+```
+{
+    "myexecutor_1": {
+        "POOL": "gcpclustergen2",
+        "REMOTE_CONDA_ENV": "parsl_py39",
+        "REMOTE_CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
+        "RUN_DIR": "/contrib/Alvaro.Vidal/tmp",
+        "WORKER_LOGDIR_ROOT": "/contrib/Alvaro.Vidal/tmp",
+        "SSH_CHANNEL_SCRIPT_DIR": "/contrib/Alvaro.Vidal/tmp",
+        "CORES_PER_WORKER": 4,
+        "HOST_IP": "35.222.130.18",
+        "WORKER_PORT_1": 55254,
+        "WORKER_PORT_2": 55255
+    },
+    "myexecutor_2": {
+        "POOL": "gcpcluster",
+        "REMOTE_CONDA_ENV": "parsl_py39",
+        "REMOTE_CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
+        "RUN_DIR": "/contrib/Alvaro.Vidal/tmp",
+        "WORKER_LOGDIR_ROOT": "/contrib/Alvaro.Vidal/tmp",
+        "SSH_CHANNEL_SCRIPT_DIR": "/contrib/Alvaro.Vidal/tmp",
+        "CORES_PER_WORKER": 4,
+        "HOST_IP": "34.136.181.73",
+        "WORKER_PORT_1": 55256,
+        "WORKER_PORT_2": 55257
+    }
+}
+```
+
+The completed configuration is used by `main.py` script to define the Parsl configuration.
+
+
