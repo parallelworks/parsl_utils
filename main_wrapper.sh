@@ -2,43 +2,55 @@
 pudir=$(dirname $0)
 . ${pudir}/utils.sh
 
-# FIXME: This entire script should not be needed!
-#        Users need to be able to decide which python environment is needed by their workflows!
-# FIXME: Need to stage correct python environment to remote VM
+# Clear logs
+mkdir -p logs
+rm -rf logs/*
 
-# This is needed for SSHChannel in Parsl
-ssh-keygen -f "/home/${PW_USER}/.ssh/known_hosts" -R ${HOST_IP}
-
+# HANDLING ENVIRONMENT IN USER CONTAINER
 LOCAL_CONDA_ENV="parsl_py39"
 LOCAL_CONDA_SH="/pw/.miniconda3/etc/profile.d/conda.sh"
-
-export REMOTE_CONDA_ENV="parsl_py39"
-export REMOTE_CONDA_DIR="/contrib/${PW_USER}/miniconda3"
-#export REMOTE_CONDA_DIR="/tmp/${PW_USER}/miniconda3" # Used for testing!
-export REMOTE_CONDA_SH="${REMOTE_CONDA_DIR}/etc/profile.d/conda.sh"
 
 # Activate or install and activate conda environment in user container
 bash ${pudir}/check_install_local.sh ${LOCAL_CONDA_SH} ${LOCAL_CONDA_ENV}
 source ${LOCAL_CONDA_SH}
 conda activate ${LOCAL_CONDA_ENV}
 
-# Activate or install and activate conda environment in remote machine
-ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${HOST_IP} 'bash -s' < ${pudir}/check_install_remote.sh ${REMOTE_CONDA_DIR} ${REMOTE_CONDA_SH} ${REMOTE_CONDA_ENV}
+# CHECKING AND PREPRARING REMOTE EXECUTORS
+# Complete configuration with executor ports and IP addresses
+# - Get used ports
+netstat -tulpn | grep LISTEN | awk '{print $4}' | rev |cut -d':' -f1 > used_ports.txt
+python parsl_utils/complete_exec_conf.py executors.json used_ports.txt
 
-# Establish SSH tunnel on available ports for parsl worker
-port_pair=$(find_available_port_pair)
-worker_port_1=$(echo ${port_pair} | cut -d' ' -f1)
-worker_port_2=$(echo ${port_pair} | cut -d' ' -f2)
-ssh_establish_tunnel_to_head_node ${HOST_IP} ${worker_port_1} ${worker_port_2}
+# Convert JSON format to line by line format (see loop_exec_conf.py)
+python parsl_utils/loop_exec_conf.py executors.json > exec_conf.export
+
+while IFS= read -r exec_conf; do
+    export ${exec_conf}
+
+    # This is needed for SSHChannel in Parsl
+    ssh-keygen -f "/home/${PW_USER}/.ssh/known_hosts" -R ${HOST_IP}
+
+    # Handling remote environment
+    export REMOTE_CONDA_SH="${REMOTE_CONDA_DIR}/etc/profile.d/conda.sh"
+    # Activate or install and activate conda environment in remote machine
+    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${HOST_IP} 'bash -s' < ${pudir}/check_install_remote.sh ${REMOTE_CONDA_DIR} ${REMOTE_CONDA_SH} ${REMOTE_CONDA_ENV}
+
+    # Establish SSH tunnel on available ports for parsl worker
+    ssh_establish_tunnel_to_head_node ${HOST_IP} ${WORKER_PORT_1} ${WORKER_PORT_2}
+
+done <   exec_conf.export
 
 # Submit Parsl JOB:
-job_id=$(date +%s)-${RANDOM}-${RANDOM}
-$@ --worker_port_1 ${worker_port_1} --worker_port_2 ${worker_port_2} --job_id ${job_id}
+job_id=$(date +%s)-${RANDOM}-${RANDOM} # To track and cancel the job
+$@ --job_id ${job_id}
 ec=$?
 main_pid=$!
 
 # Cancel tunnel on the remote side only
-ssh_cancel_tunnel_to_head_node ${HOST_IP} ${worker_port_1} ${worker_port_2}
+while IFS= read -r exec_conf; do
+    export ${exec_conf}
+    ssh_cancel_tunnel_to_head_node ${HOST_IP} ${WORKER_PORT_1} ${WORKER_PORT_2}
+done <   exec_conf.export
 
 # Kill all descendant processes
 pkill -P ${main_pid}
