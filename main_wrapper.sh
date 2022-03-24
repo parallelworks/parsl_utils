@@ -41,10 +41,14 @@ while IFS= read -r exec_conf; do
 done <   exec_conf.export
 
 # Submit Parsl JOB:
+echo; echo; echo
+echo "RUNNING PARSL JOB"
+echo
 job_id=$(date +%s)-${RANDOM}-${RANDOM} # To track and cancel the job
 $@ --job_id ${job_id}
 ec=$?
 main_pid=$!
+echo; echo; echo
 
 # Cancel tunnel on the remote side only
 while IFS= read -r exec_conf; do
