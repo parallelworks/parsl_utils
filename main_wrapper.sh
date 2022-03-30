@@ -44,7 +44,7 @@ done <   exec_conf.export
 echo; echo; echo
 echo "RUNNING PARSL JOB"
 echo
-job_id=$(date +%s)-${RANDOM}-${RANDOM} # To track and cancel the job
+job_id=job-$(basename ${PWD})_date-$(date +%s)_random-${RANDOM} # To track and cancel the job
 $@ --job_id ${job_id}
 ec=$?
 main_pid=$!
