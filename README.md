@@ -2,12 +2,11 @@
 This repo contains helper scripts for running native/official Parsl in cluster pools on the PW platform. These scripts are considered temporary ad-hoc code that should be better integrated on the platform and were develeped to temporarily address the issues below:
 
 ### 1. Conda Environment:
-Workflows needs to run in a specific conda environment which needs to be installed and accessible on the user container and on the head node of the cluster. The scripts `main_wrapper.py` and `main_wrapper.sh` are used to activate the environment on the PW platform before running the workflow. The scripts `check_install_local.sh` and `check_install_remote.sh` are used to verify or install the right environment in the local and remote machines, respetively. The `workflow.xml` executes the python wrapper `<command interpreter='parsl'>main_wrapper.py</command>` using the parsl interpreter that executes python in the default conda environment. The `main_wrapper.py` script redirects the arguments to the `main_wrapper.sh` script that activates the right conda environment and checks that it is installed and available on the user container and on the head node of the cluster. The `main_wrapper.py` could be avoided with a `bash` workflow interpreter. To solve this obstacle I see three options:
-1. Support one native parsl environment (install it in every user container) and ship it to the head node if required).
-2. Support bringing and sharing your own conda environment(s)
-3. Include an install.sh script with every workflow that creates its own conda environment. This is option is implemented now in the `check_install_*.sh` scripts.
-
-In each case above, the conda environment would need to be sent to or installed in the head node.
+Workflows needs to run in a specific conda environment which needs to be installed and accessible on the user container and on the head node of the cluster.
+- The scripts `main_wrapper.py` and `main_wrapper.sh` are used to activate the environment on the PW platform before running the workflow. The `workflow.xml` executes the python wrapper `<command interpreter='parsl'>main_wrapper.py</command>` using the parsl interpreter that executes python in the default conda environment. The `main_wrapper.py` could be avoided with a `bash` workflow interpreter.
+- The `main_wrapper.py` script redirects the arguments to the `main_wrapper.sh` script that activates the right conda environment
+- The scripts `install_conda_requirements.sh` makes sure that conda is installed and the right conda environment is present. Conda environments are defined by their corresponding YAML files (`conda env export`) for the local (PW) and executor environments in the `local.conf` and `executor.json` files of the workflow. The `main_wrapper.py` could be avoided with a `bash` workflow interpreter.
+- The YAML files for the local and executor environments are provided as workflow files, for example, under a requirements directory.
 
 ### 2. Tunnels for the worker ports:
 Parsl needs to access at least two remote executor ports. SSH tunnels are created by the `main_wrapper.sh` scripts. The script searches for available ports, establishes the tunnels before running the workflow and cancels the tunnels after running the workflow.
@@ -74,21 +73,25 @@ The resource definition section for workflows is very outdated on the platform. 
 {
     "myexecutor_1": {
         "POOL": "gcpclustergen2",
-        "REMOTE_CONDA_ENV": "parsl_py39",
-        "REMOTE_CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
+        "CONDA_ENV": "parsl_py39",
+        "CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
         "RUN_DIR": "/contrib/Alvaro.Vidal/tmp",
         "WORKER_LOGDIR_ROOT": "/contrib/Alvaro.Vidal/tmp",
         "SSH_CHANNEL_SCRIPT_DIR": "/contrib/Alvaro.Vidal/tmp",
-        "CORES_PER_WORKER": 4
+        "CORES_PER_WORKER": 4,
+        "INSTALL_CONDA": "true",
+        "LOCAL_CONDA_YAML": "./requirements/conda_env.yaml"
     },
     "myexecutor_2": {
         "POOL": "gcpcluster",
-        "REMOTE_CONDA_ENV": "parsl_py39",
-        "REMOTE_CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
+        "CONDA_ENV": "parsl_py39",
+        "CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
         "RUN_DIR": "/contrib/Alvaro.Vidal/tmp",
         "WORKER_LOGDIR_ROOT": "/contrib/Alvaro.Vidal/tmp",
         "SSH_CHANNEL_SCRIPT_DIR": "/contrib/Alvaro.Vidal/tmp",
-        "CORES_PER_WORKER": 4
+        "CORES_PER_WORKER": 4,
+        "INSTALL_CONDA": "true",
+        "LOCAL_CONDA_YAML": "./requirements/conda_env.yaml"
     }
 }
 ```
@@ -105,6 +108,8 @@ The label is the top level key of the JSON. The script `parsl_utils/complete_exe
         "WORKER_LOGDIR_ROOT": "/contrib/Alvaro.Vidal/tmp",
         "SSH_CHANNEL_SCRIPT_DIR": "/contrib/Alvaro.Vidal/tmp",
         "CORES_PER_WORKER": 4,
+        "INSTALL_CONDA": "true",
+        "LOCAL_CONDA_YAML": "./requirements/conda_env.yaml",
         "HOST_IP": "35.222.130.18",
         "WORKER_PORT_1": 55254,
         "WORKER_PORT_2": 55255
@@ -117,6 +122,8 @@ The label is the top level key of the JSON. The script `parsl_utils/complete_exe
         "WORKER_LOGDIR_ROOT": "/contrib/Alvaro.Vidal/tmp",
         "SSH_CHANNEL_SCRIPT_DIR": "/contrib/Alvaro.Vidal/tmp",
         "CORES_PER_WORKER": 4,
+        "INSTALL_CONDA": "true",
+        "LOCAL_CONDA_YAML": "./requirements/conda_env.yaml",
         "HOST_IP": "34.136.181.73",
         "WORKER_PORT_1": 55256,
         "WORKER_PORT_2": 55257

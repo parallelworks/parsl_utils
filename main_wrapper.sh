@@ -6,14 +6,31 @@ pudir=$(dirname $0)
 mkdir -p logs
 rm -rf logs/*
 
-# HANDLING ENVIRONMENT IN USER CONTAINER
-LOCAL_CONDA_ENV="parsl_py39"
-LOCAL_CONDA_SH="/pw/.miniconda3/etc/profile.d/conda.sh"
+# Use a job_id to:
+# 1. Track / cancel job
+# 2. Stage temporary files
+job_id=job-$(basename ${PWD})_date-$(date +%s)_random-${RANDOM}
 
+ssh_options="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+
+# CHECKING AND PREPARING USER CONTAINER
+# Install conda requirements in local environment (user container)
+# Different workflows may have different local environments
+# Shared workflows may be missing their environment
+if [ ! -f local.conf ]; then
+    echo "ERROR: Need to specify a local configuration file with at least the following variables:"
+    echo CONDA_DIR=/path/to/conda/
+    echo CONDA_ENV=name-of-conda-environment
+    exit 1
+fi
+
+source local.conf
+if [[ ${INSTALL_CONDA} == true ]]; then
+    bash ${pudir}/install_conda_requirements.sh ${CONDA_DIR} ${CONDA_ENV} ${LOCAL_CONDA_YAML} &> logs/local_install_conda_requirements.out
+fi
 # Activate or install and activate conda environment in user container
-bash ${pudir}/check_install_local.sh ${LOCAL_CONDA_SH} ${LOCAL_CONDA_ENV}
-source ${LOCAL_CONDA_SH}
-conda activate ${LOCAL_CONDA_ENV}
+source ${CONDA_DIR}/etc/profile.d/conda.sh
+conda activate ${CONDA_ENV}
 
 # CHECKING AND PREPRARING REMOTE EXECUTORS
 # Complete configuration with executor ports and IP addresses
@@ -30,11 +47,12 @@ while IFS= read -r exec_conf; do
     # This is needed for SSHChannel in Parsl
     ssh-keygen -f "/home/${PW_USER}/.ssh/known_hosts" -R ${HOST_IP}
 
-    # Handling remote environment
-    export REMOTE_CONDA_SH="${REMOTE_CONDA_DIR}/etc/profile.d/conda.sh"
-    # Activate or install and activate conda environment in remote machine
-    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${HOST_IP} 'bash -s' < ${pudir}/check_install_remote.sh ${REMOTE_CONDA_DIR} ${REMOTE_CONDA_SH} ${REMOTE_CONDA_ENV}
-
+    # install conda requirements in remote executors
+    if [[ ${INSTALL_CONDA} == true ]]; then
+        REMOTE_CONDA_YAML=/tmp/${job_id}_conda.yaml
+        scp ${ssh_options} ${LOCAL_CONDA_YAML} ${HOST_IP}:${REMOTE_CONDA_YAML}
+        ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${HOST_IP} 'bash -s' < ${pudir}/install_conda_requirements.sh ${CONDA_DIR} ${CONDA_ENV} ${REMOTE_CONDA_YAML} &> logs/${LABEL}_install_conda_requirements.out
+    fi
     # Establish SSH tunnel on available ports for parsl worker
     ssh_establish_tunnel_to_head_node ${HOST_IP} ${WORKER_PORT_1} ${WORKER_PORT_2}
 
@@ -44,7 +62,7 @@ done <   exec_conf.export
 echo; echo; echo
 echo "RUNNING PARSL JOB"
 echo
-job_id=job-$(basename ${PWD})_date-$(date +%s)_random-${RANDOM} # To track and cancel the job
+# To track and cancel the job
 $@ --job_id ${job_id}
 ec=$?
 main_pid=$!
