@@ -32,6 +32,14 @@ config = Config(
 )
 ```
 
+TODO: This approach only works with the LocalProvider. To us the SlurmProvider we need tunnels also from compute nodes (not just the head node). Right now it is failing to connect:
+```
+[Alvaro.Vidal@compute-0001 tmp]$ cat parsl.slurm.1648163466.0924313.submit.stdout
+Found cores : 30
+Launching worker: 1
+Failed to find a viable address to connect to interchange. Exiting
+```
+
 ### 3. Staging:
 I have not been able to use a data provider available in native parsl. Note that if we were to develop our own data providers we would need to address how to integrate this into the native/official parsl distributions. Therefore, the script `parsl_wrappers.py` and `staging.py` were developed to handle inputs and outputs before and after the app runs, respectively, using a function decorator. An example is shown below:
 
