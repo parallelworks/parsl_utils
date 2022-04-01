@@ -79,27 +79,33 @@ The resource definition section for workflows is very outdated on the platform. 
 
 ```
 {
-    "myexecutor_1": {
-        "POOL": "gcpclustergen2",
+    "cpu_executor": {
+        "POOL": "koehr_cpu",
         "CONDA_ENV": "parsl_py39",
         "CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
-        "RUN_DIR": "/contrib/Alvaro.Vidal/tmp",
-        "WORKER_LOGDIR_ROOT": "/contrib/Alvaro.Vidal/tmp",
-        "SSH_CHANNEL_SCRIPT_DIR": "/contrib/Alvaro.Vidal/tmp",
+        "RUN_DIR": "/home/Alvaro.Vidal/tmp",
+        "WORKER_LOGDIR_ROOT": "/home/Alvaro.Vidal/tmp",
+        "SSH_CHANNEL_SCRIPT_DIR": "/home/Alvaro.Vidal/tmp",
+        "SINGULARITY_CONTAINER_PATH": "/contrib/Alvaro.Vidal/tensorflow_latest-gpu-jupyter-extra.sif",
         "CORES_PER_WORKER": 4,
+        "CREATE_SINGULARITY_CONTAINER": "true",
         "INSTALL_CONDA": "true",
-        "LOCAL_CONDA_YAML": "./requirements/conda_env.yaml"
+        "LOCAL_CONDA_YAML": "./requirements/conda_env.yaml",
+        "LOCAL_SINGULARITY_FILE": "./requirements/singularity.file"
     },
-    "myexecutor_2": {
-        "POOL": "gcpcluster",
+    "gpu_executor": {
+        "POOL": "google_gpu",
         "CONDA_ENV": "parsl_py39",
         "CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
-        "RUN_DIR": "/contrib/Alvaro.Vidal/tmp",
-        "WORKER_LOGDIR_ROOT": "/contrib/Alvaro.Vidal/tmp",
-        "SSH_CHANNEL_SCRIPT_DIR": "/contrib/Alvaro.Vidal/tmp",
+        "RUN_DIR": "/home/Alvaro.Vidal/tmp",
+        "WORKER_LOGDIR_ROOT": "/home/Alvaro.Vidal/tmp",
+        "SSH_CHANNEL_SCRIPT_DIR": "/home/Alvaro.Vidal/tmp",
+        "SINGULARITY_CONTAINER_PATH": "/contrib/Alvaro.Vidal/tensorflow_latest-gpu-jupyter-extra.sif",
         "CORES_PER_WORKER": 4,
+        "CREATE_SINGULARITY_CONTAINER": "true",
         "INSTALL_CONDA": "true",
-        "LOCAL_CONDA_YAML": "./requirements/conda_env.yaml"
+        "LOCAL_CONDA_YAML": "./requirements/conda_env.yaml",
+        "LOCAL_SINGULARITY_FILE": "./requirements/singularity.file"
     }
 }
 ```
@@ -108,37 +114,85 @@ The label is the top level key of the JSON. The script `parsl_utils/complete_exe
 
 ```
 {
-    "myexecutor_1": {
-        "POOL": "gcpclustergen2",
-        "REMOTE_CONDA_ENV": "parsl_py39",
-        "REMOTE_CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
-        "RUN_DIR": "/contrib/Alvaro.Vidal/tmp",
-        "WORKER_LOGDIR_ROOT": "/contrib/Alvaro.Vidal/tmp",
-        "SSH_CHANNEL_SCRIPT_DIR": "/contrib/Alvaro.Vidal/tmp",
+    "cpu_executor": {
+        "POOL": "koehr_cpu",
+        "CONDA_ENV": "parsl_py39",
+        "CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
+        "RUN_DIR": "/home/Alvaro.Vidal/tmp",
+        "WORKER_LOGDIR_ROOT": "/home/Alvaro.Vidal/tmp",
+        "SSH_CHANNEL_SCRIPT_DIR": "/home/Alvaro.Vidal/tmp",
+        "SINGULARITY_CONTAINER_PATH": "/contrib/Alvaro.Vidal/tensorflow_latest-gpu-jupyter-extra.sif",
         "CORES_PER_WORKER": 4,
+        "CREATE_SINGULARITY_CONTAINER": "true",
         "INSTALL_CONDA": "true",
         "LOCAL_CONDA_YAML": "./requirements/conda_env.yaml",
-        "HOST_IP": "35.222.130.18",
-        "WORKER_PORT_1": 55254,
-        "WORKER_PORT_2": 55255
+        "LOCAL_SINGULARITY_FILE": "./requirements/singularity.file",
+        "HOST_IP": "34.136.254.27",
+        "WORKER_PORT_1": 55351,
+        "WORKER_PORT_2": 55352
     },
-    "myexecutor_2": {
-        "POOL": "gcpcluster",
-        "REMOTE_CONDA_ENV": "parsl_py39",
-        "REMOTE_CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
-        "RUN_DIR": "/contrib/Alvaro.Vidal/tmp",
-        "WORKER_LOGDIR_ROOT": "/contrib/Alvaro.Vidal/tmp",
-        "SSH_CHANNEL_SCRIPT_DIR": "/contrib/Alvaro.Vidal/tmp",
+    "gpu_executor": {
+        "POOL": "google_gpu",
+        "CONDA_ENV": "parsl_py39",
+        "CONDA_DIR": "/contrib/Alvaro.Vidal/miniconda3",
+        "RUN_DIR": "/home/Alvaro.Vidal/tmp",
+        "WORKER_LOGDIR_ROOT": "/home/Alvaro.Vidal/tmp",
+        "SSH_CHANNEL_SCRIPT_DIR": "/home/Alvaro.Vidal/tmp",
+        "SINGULARITY_CONTAINER_PATH": "/contrib/Alvaro.Vidal/tensorflow_latest-gpu-jupyter-extra.sif",
         "CORES_PER_WORKER": 4,
+        "CREATE_SINGULARITY_CONTAINER": "true",
         "INSTALL_CONDA": "true",
         "LOCAL_CONDA_YAML": "./requirements/conda_env.yaml",
-        "HOST_IP": "34.136.181.73",
-        "WORKER_PORT_1": 55256,
-        "WORKER_PORT_2": 55257
+        "LOCAL_SINGULARITY_FILE": "./requirements/singularity.file",
+        "HOST_IP": "34.121.107.245",
+        "WORKER_PORT_1": 55353,
+        "WORKER_PORT_2": 55354
     }
 }
 ```
 
 The completed configuration is used by `main.py` script to define the Parsl configuration.
+
+An option that would provide flexibility to the workflow developer would be to:
+1. Add a JSON parser to the workflow launching process such that it is up to the workflow developer to include different executor properties (singularity, docker, Vcinity end point, etc).
+2. Add some documentation (like the workflow description) to be displayed together with the JSON expaining the requirements for each pool (image names, software requirements, external disks, ...) and the meaning of the keys in the JSON file
+
+This can be achieved already using Jupyter notebooks to edit the JSON (see DIU notebook). For presenting the JSON parser in the input form I see two options:
+1. Use the cloud-like icon to display the parser
+2. Present it when the user clicks execute in the context of "update / verify / accept" these executor settings.
+
+### 5. Killing jobs:
+Some workflow run indefinitely like the `start_scheduler` (GT) or `start_jupyterlab`. For the `start_jupyterlab` workflow I have not been able to exit the workflow without killing juputerlab. Other times you just want to kill a job because it was running for two long or you detect some issue. This is particularly importante since you also need to kill the tunnels. Right now there is no way of doing this. I have added the following lines to the `main_wrapper.sh` to handle this. The job is passed an argument with the job id:
+
+```
+job_number=$(basename ${PWD})
+job_id=job-${job_number}_date-$(date +%s)_random-${RANDOM}
+# To track and cancel the job
+$@ --job_id ${job_id}
+ec=$?
+main_pid=$!
+```
+
+Such that you can find the running process with `ps -x | grep job_number` (or by date). And the following lines to make sure all processes started by the job die including the tunnels in the user container:
+
+```
+# Kill all descendant processes
+pkill -P ${main_pid}
+pkill -P $$
+
+# Make super sure python process dies:
+python_pid=$(ps -x | grep  ${job_id} | grep python | awk '{print $1}')
+if ! [ -z "${python_pid}" ]; then
+    echo
+    echo "Killing remaining python process ${python_pid}"
+    pkill -p ${python_pid}
+    kill ${python_pid}
+fi
+```
+
+
+
+
+
 
 
