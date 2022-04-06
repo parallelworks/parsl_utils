@@ -41,6 +41,7 @@ python parsl_utils/complete_exec_conf.py executors.json used_ports.txt
 # Convert JSON format to line by line format (see loop_exec_conf.py)
 python parsl_utils/loop_exec_conf.py executors.json > exec_conf.export
 
+# TODO: Consider using CSSH or PSSH here?
 while IFS= read -r exec_conf; do
     export ${exec_conf}
 

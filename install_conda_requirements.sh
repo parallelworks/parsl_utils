@@ -6,6 +6,8 @@ CONDA_YAML=$3
 
 CONDA_SH="${CONDA_DIR}/etc/profile.d/conda.sh"
 
+# conda env export
+
 # Remove line starting with name, prefix and remove empty lines
 sed -i -e 's/name.*$//' -e 's/prefix.*$//' -e '/^$/d' ${CONDA_YAML}
 
