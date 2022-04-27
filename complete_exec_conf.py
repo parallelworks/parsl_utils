@@ -81,9 +81,14 @@ if __name__ == '__main__':
         exec_conf = json.load(f)
 
     for exec_label, exec_conf_i in exec_conf.items():
-        exec_conf[exec_label]['HOST_IP'] = get_master_node_ip(exec_conf_i['POOL'])
+        if 'HOST_IP' not in exec_conf[exec_label]:
+            exec_conf[exec_label]['HOST_IP'] = get_master_node_ip(exec_conf_i['POOL'])
+
         exec_conf[exec_label]['WORKER_PORT_1'], exec_conf[exec_label]['WORKER_PORT_2'] = get_available_port_pairs(start_port, used_ports)
         used_ports += [exec_conf[exec_label]['WORKER_PORT_1'], exec_conf[exec_label]['WORKER_PORT_2']]
+
+        if 'HOST_USER' not in exec_conf[exec_label]:
+            exec_conf[exec_label]['HOST_USER'] = os.environ['PW_USER']
 
     with open(sys.argv[1], 'w') as fp:
         json.dump(exec_conf, fp, indent = 4)

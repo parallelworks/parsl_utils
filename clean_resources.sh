@@ -9,5 +9,5 @@ fi
 # Cancel tunnel on the remote side only
 while IFS= read -r exec_conf; do
     export ${exec_conf}
-    ssh_cancel_tunnel_to_head_node ${HOST_IP} ${WORKER_PORT_1} ${WORKER_PORT_2}
+    ssh_cancel_tunnel_to_head_node ${HOST_IP} ${HOST_USER} ${WORKER_PORT_1} ${WORKER_PORT_2}
 done <   exec_conf.export

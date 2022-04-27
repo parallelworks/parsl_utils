@@ -28,25 +28,27 @@ find_available_port_pair () {
 
 ssh_establish_tunnel_to_head_node() {
     HOST_IP=$1
-    port_1=$2
-    port_2=$3
+    HOST_USER=$2
+    port_1=$3
+    port_2=$4
     int_ip=$(hostname -I | sed "s/ //g")
-    u=${PW_USER}
+    u=${HOST_USER}
     s=${PW_USER_HOST}
-    tunnel_cmd="sudo -E -u ${PW_USER} bash -c \"setsid ssh -L 0.0.0.0:${port_1}:${int_ip}:${port_1} -L 0.0.0.0:${port_2}:${int_ip}:${port_2} ${u}@${s} -fNT\""
+    tunnel_cmd="sudo -E -u ${HOST_USER} bash -c \"setsid ssh -L 0.0.0.0:${port_1}:${int_ip}:${port_1} -L 0.0.0.0:${port_2}:${int_ip}:${port_2} ${u}@${s} -fNT\""
     echo ${tunnel_cmd} > establish_tunnel_to_head_node.sh
-    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${HOST_IP} -t 'sudo bash -s' < establish_tunnel_to_head_node.sh
+    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${HOST_USER}@${HOST_IP} -t 'sudo bash -s' < establish_tunnel_to_head_node.sh
 }
 
 ssh_cancel_tunnel_to_head_node() {
     HOST_IP=$1
-    port_1=$2
-    port_2=$3
+    HOST_USER=$2
+    port_1=$3
+    port_2=$4
     int_ip=$(hostname -I | sed "s/ //g")
-    u=${PW_USER}
+    u=${HOST_USER}
     s=${PW_USER_HOST}
     tunnel_cmd="sudo -E -u ${PW_USER} bash -c \"ssh -O cancel -L 0.0.0.0:${port_1}:${int_ip}:${port_1} -L 0.0.0.0:${port_2}:${int_ip}:${port_2} ${u}@${s} -fNT\""
     echo ${tunnel_cmd} > cancel_tunnel_to_head_node.sh
-    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${HOST_IP} -t 'sudo bash -s' < cancel_tunnel_to_head_node.sh
+    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${HOST_USER}@${HOST_IP} -t 'sudo bash -s' < cancel_tunnel_to_head_node.sh
 }
 
