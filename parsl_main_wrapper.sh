@@ -1,5 +1,12 @@
 #!/bin/bash
+date
+
+# DESCRIPTION:
+# - Wraps parsl main python script to handle integration with PW (see README.md)
+
+# Get parsl_utils code:
 pudir=$(dirname $0)
+
 . ${pudir}/utils.sh
 
 # Clear logs
@@ -44,8 +51,9 @@ bash ${pudir}/prepare_resources.sh ${job_id} &> logs/prepare_resources.out
 echo; echo; echo
 echo "RUNNING PARSL JOB"
 echo
+echo "Input parameters: $@"
 # To track and cancel the job
-$@ --job_id ${job_id}
+python ${main_script} $@ --job_id ${job_id}
 ec=$?
 main_pid=$!
 echo; echo; echo
