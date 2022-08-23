@@ -53,3 +53,24 @@ ssh_cancel_tunnel_to_head_node() {
     ssh ${ssh_options} ${HOST_USER}@${HOST_IP} -t 'sudo bash -s' < cancel_tunnel_to_head_node.sh
 }
 
+# Exports inputs in the format
+# --a 1 --b 2 --c 3
+# to:
+# export a=1 b=2 c=3
+f_read_cmd_args(){
+    index=1
+    args=""
+    for arg in $@; do
+	    prefix=$(echo "${arg}" | cut -c1-2)
+	    if [[ ${prefix} == '--' ]]; then
+	        pname=$(echo $@ | cut -d ' ' -f${index} | sed 's/--//g')
+	        pval=$(echo $@ | cut -d ' ' -f$((index + 1)))
+		    # To support empty inputs (--a 1 --b --c 3)
+		    if [ ${pval:0:2} != "--" ]; then
+	            echo "export ${pname}=${pval}" >> $(dirname $0)/env.sh
+	            export "${pname}=${pval}"
+		    fi
+	    fi
+        index=$((index+1))
+    done
+}

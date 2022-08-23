@@ -8,6 +8,8 @@ from random import randint
 
 # NO PRINT STATEMENTS ALLOWED!!
 
+# PARSL WONT WORK WITH POOLNAME.CLUSTERS.PW!!
+
 logging.basicConfig(
     filename = os.path.join('logs', os.path.basename(__file__).replace('py', 'log')),
     format = '%(asctime)s %(levelname)-8s %(message)s',

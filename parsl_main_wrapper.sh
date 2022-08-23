@@ -9,6 +9,8 @@ pudir=$(dirname $0)
 
 . ${pudir}/utils.sh
 
+f_read_cmd_args $@
+
 # Clear logs
 mkdir -p logs
 rm -rf logs/*
@@ -16,7 +18,10 @@ rm -rf logs/*
 # Use a job_id to:
 # 1. Track / cancel job
 # 2. Stage temporary files
-job_id=$(basename ${PWD})   #job-${job_num}_date-$(date +%s)_random-${RANDOM}
+job_id=${job_number}   #job-${job_num}_date-$(date +%s)_random-${RANDOM}
+if [ -z "${job_id}" ]; then
+    job_id=job-${RANDOM}
+fi
 
 #########################################
 # CHECKING AND PREPARING USER CONTAINER #
