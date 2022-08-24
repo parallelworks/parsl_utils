@@ -1,4 +1,11 @@
+import sys
 import json
+import errno
+import os
+import signal
+import functools
+import traceback
+
 from . import staging
 
 stage_inputs = staging.stage_inputs
@@ -64,3 +71,81 @@ def log_app(func):
         return func(*args, **kwargs)
 
     return wrapper
+
+
+class RetryFuture:
+    def __init__(self, app_wrapper, executors, *args, **kwargs):
+        self.executors = executors
+        self.app_wrapper = app_wrapper
+        self.app_args = args
+        self.app_kwargs = kwargs
+
+        # Submit app (initialize):
+        print('\n\nRunning in executor {}'.format(self.executors[0]), flush = True)
+        self.fut = self.app_wrapper(executor_name = self.executors[0])(*self.app_args,**self.app_kwargs)
+
+    def result(self):
+        for ei,executor in enumerate(self.executors):
+            # Get parsl app (define decorator parameters)
+            try:
+                if ei == 0:
+                    return self.fut.result()
+                else:
+                    print('\n\nRunning in executor {}'.format(executor), flush = True)
+                    self.fut = self.app_wrapper(executor_name = executor)(*self.app_args,**self.app_kwargs)
+                    return self.fut.result()
+
+            except Exception:
+                print(traceback.format_exc(), flush = True)
+
+        raise Exception('App wrapper {} failed in all the executors: {}'.format(self.app_wrapper, ' '.join(self.executors)))
+
+
+# THESE DECORATORS ARE NOT NEEDED SINCE THE WALLTIME SPECIAL PARAMETER CAN BE USED IN THE PARSL APP DEFINITION
+class TimeoutError(Exception):
+    pass
+
+def timeout(seconds_attr = None, error_message = os.strerror(errno.ETIME)):
+    def decorator(func):
+        def _handle_timeout(signum, frame):
+            raise TimeoutError(error_message)
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+
+            try:
+                seconds = getattr(args[0], seconds_attr)
+            except:
+                raise(Exception('Attribute {} not found in {}'.format(seconds_attr, args[0])))
+
+            signal.signal(signal.SIGALRM, _handle_timeout)
+            signal.alarm(seconds)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                signal.alarm(0)
+            return result
+
+        return wrapper
+
+    return decorator
+
+
+
+class TimeoutFuture:
+    def __init__(self, future, seconds):
+        self.future = future
+        self.seconds = seconds
+
+    @timeout(seconds_attr = 'seconds')
+    def result(self):
+        return self.future.result()
+
+
+def timeout_app(seconds = 57):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            fut = func(*args, **kwargs)
+            return TimeoutFuture(fut, seconds)
+        return wrapper
+    return decorator
