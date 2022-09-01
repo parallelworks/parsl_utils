@@ -74,31 +74,36 @@ def log_app(func):
 
 
 class RetryFuture:
-    def __init__(self, app_wrapper, executors, *args, **kwargs):
+    def __init__(self, app_wrapper, executors):
         self.executors = executors
         self.app_wrapper = app_wrapper
-        self.app_args = args
-        self.app_kwargs = kwargs
 
         # Submit app (initialize):
         print('\n\nRunning in executor {}'.format(self.executors[0]), flush = True)
-        self.fut = self.app_wrapper(executor_name = self.executors[0])(*self.app_args,**self.app_kwargs)
+        self.fut = self.app_wrapper(
+            executor_name = self.executors[0]['executor']
+        )(
+            *self.executors[0]['args'],
+            **self.executors[0]['kwargs']
+        )
 
     def result(self):
-        for ei,executor in enumerate(self.executors):
-            # Get parsl app (define decorator parameters)
-            try:
-                if ei == 0:
-                    return self.fut.result()
-                else:
+        try:
+            return self.fut.result()
+        except:
+            print(traceback.format_exc(), flush = True)
+            for executor in self.executors[1:]:
+                try:
                     print('\n\nRunning in executor {}'.format(executor), flush = True)
-                    self.fut = self.app_wrapper(executor_name = executor)(*self.app_args,**self.app_kwargs)
+                    self.fut = self.app_wrapper(executor_name = executor['executor'])(
+                        *executor['args'],
+                        **executor['kwargs']
+                    )
                     return self.fut.result()
+                except Exception:
+                    print(traceback.format_exc(), flush = True)
 
-            except Exception:
-                print(traceback.format_exc(), flush = True)
-
-        raise Exception('App wrapper {} failed in all the executors: {}'.format(self.app_wrapper, ' '.join(self.executors)))
+        raise Exception('App wrapper {} failed in all the executors'.format(self.app_wrapper))
 
 
 # THESE DECORATORS ARE NOT NEEDED SINCE THE WALLTIME SPECIAL PARAMETER CAN BE USED IN THE PARSL APP DEFINITION
