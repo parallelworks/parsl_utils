@@ -74,3 +74,30 @@ f_read_cmd_args(){
         index=$((index+1))
     done
 }
+
+
+# get a unique open port
+# - try end point
+# - if not works --> use random
+getOpenPort() {
+    minPort=50000
+    maxPort=50500
+
+    openPort=$(curl -s "https://${PW_USER_HOST}/api/v2/usercontainer/getSingleOpenPort?minPort=${minPort}&maxPort=${maxPort}&key=${PW_API_KEY}")
+    # Check if openPort variable is a port
+    if ! [[ ${openPort} =~ ^[0-9]+$ ]] ; then
+        qty=1
+        count=0
+        for i in $(seq $minPort $maxPort | shuf); do
+            out=$(netstat -aln | grep LISTEN | grep $i)
+            if [[ "$out" == "" ]];then
+                openPort=$(echo $i)
+                (( ++ count ))
+            fi
+            if [[ "$count" == "$qty" ]];then
+                break
+            fi
+        done
+    fi
+    echo $openPort
+}

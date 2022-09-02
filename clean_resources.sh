@@ -3,7 +3,7 @@ pudir=$(dirname $0)
 
 # This file is created by ${pudir}/prepare_resources.sh
 if ! [ -f "exec_conf.export" ]; then
-    python ${pudir}/loop_exec_conf.py executors.json > exec_conf.export
+    python ${pudir}/json2txt.py executors.json > exec_conf.export
 fi
 
 # Cancel tunnel on the remote side only
