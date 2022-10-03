@@ -42,6 +42,7 @@ while IFS= read -r exec_conf; do
     fi
 
     echo ${exec_conf} >> exec_conf_completed.export
+    unset HOST_IP WORKER_PORT_2 WORKER_PORT_1 HOST_USER
 
 done <  exec_conf.export
 
