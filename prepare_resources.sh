@@ -39,6 +39,11 @@ while IFS= read -r exec_conf; do
     if [ -z ${HOST_IP} ]; then
         HOST_IP=$(${CONDA_PYTHON_EXE} /swift-pw-bin/utils/cluster-ip-api-wrapper.py ${POOL}.clusters.pw)
         exec_conf="${exec_conf} HOST_IP=${HOST_IP}"
+        # When the ip-api-wrapper times out it returns the pool name
+        if [ -z ${HOST_IP} ] || [[ ${HOST_IP}==${POOL} ]]; then
+            echo "ERROR: Host IP for pool <${POOL}> wast not found! Exiting workflow"
+            exit 1
+        fi
     fi
 
     echo ${exec_conf} >> exec_conf_completed.export
