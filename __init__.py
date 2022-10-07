@@ -3,3 +3,4 @@ from . import tunnels
 from . import staging
 from . import popen
 from . import ssh_cmds
+from . import resource_info

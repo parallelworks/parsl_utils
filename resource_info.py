@@ -1,10 +1,10 @@
 import json
-import sys
 import os
 import requests
 from time import sleep
 import logging
-from random import randint
+import glob
+
 
 # NO PRINT STATEMENTS ALLOWED!!
 
@@ -59,38 +59,6 @@ def get_master_node_ip(pool_name):
 
         sleep(20)
 
-
-def get_available_port_pairs(port_1, used_ports):
-    port_2 = port_1 + 1
-    while port_1 in used_ports or port_2 in used_ports:
-        port_1 +=1
-        port_2 = port_1 + 1
-    return port_1, port_2
-
-if __name__ == '__main__':
-    exec_conf_json = sys.argv[1]
-    used_ports_txt = sys.argv[2]
-
-    # To minize collision chances use randint
-    start_port = 55200 + randint(0, 200)
-
-    with open(used_ports_txt) as fp:
-        used_ports = [ int(port) for port in fp.readlines() ]
-
-    logger.info('Used ports: {}'.format(' '. join([ str(p) for p in used_ports])))
-
-    with open(exec_conf_json, 'r') as f:
-        exec_conf = json.load(f)
-
-    for exec_label, exec_conf_i in exec_conf.items():
-        if 'HOST_IP' not in exec_conf[exec_label]:
-            exec_conf[exec_label]['HOST_IP'] = get_master_node_ip(exec_conf_i['POOL'])
-
-        exec_conf[exec_label]['WORKER_PORT_1'], exec_conf[exec_label]['WORKER_PORT_2'] = get_available_port_pairs(start_port, used_ports)
-        used_ports += [exec_conf[exec_label]['WORKER_PORT_1'], exec_conf[exec_label]['WORKER_PORT_2']]
-
-        if 'HOST_USER' not in exec_conf[exec_label]:
-            exec_conf[exec_label]['HOST_USER'] = os.environ['PW_USER']
-
-    with open(sys.argv[1], 'w') as fp:
-        json.dump(exec_conf, fp, indent = 4)
+def get_latest_session(pool_name):
+    rdir = os.path.join('/pw/.pools/', os.environ['PW_USER'], pool_name, '[0-9][0-9][0-9][0-9][0-9]')
+    return max([int(os.path.basename(i)) for i in glob.glob(rdir) if os.path.basename(i).isdigit() ])
