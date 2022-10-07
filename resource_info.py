@@ -6,8 +6,8 @@ import logging
 import glob
 
 
+## NOTES:
 # NO PRINT STATEMENTS ALLOWED!!
-
 # PARSL WONT WORK WITH POOLNAME.CLUSTERS.PW!!
 
 logging.basicConfig(
@@ -19,7 +19,11 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 
-def get_pool_info(pool_name, url_resources, retries = 3):
+# URLs
+url_resources = 'https://' + os.environ['PARSL_CLIENT_HOST'] +"/api/resources?key=" + os.environ['PW_API_KEY']
+
+
+def get_pool_info(pool_name, url_resources = url_resources, retries = 3):
     while retries >= 0:
         res = requests.get(url_resources)
         for pool in res.json():
@@ -35,9 +39,8 @@ def get_pool_info(pool_name, url_resources, retries = 3):
     raise(Exception(error_msg))
 
 # Get the IP of the master node in the pool
-def get_master_node_ip(pool_name):
+def get_master_node_ip(pool_name, url_resources = url_resources):
 
-    url_resources = 'https://' + os.environ['PARSL_CLIENT_HOST'] +"/api/resources?key=" + os.environ['PW_API_KEY']
 
     while True:
         cluster = get_pool_info(pool_name, url_resources)
@@ -62,3 +65,21 @@ def get_master_node_ip(pool_name):
 def get_latest_session(pool_name):
     rdir = os.path.join('/pw/.pools/', os.environ['PW_USER'], pool_name, '[0-9][0-9][0-9][0-9][0-9]')
     return max([int(os.path.basename(i)) for i in glob.glob(rdir) if os.path.basename(i).isdigit() ])
+
+
+
+def get_resource_messages(pool_name):
+    session_number = get_latest_session(pool_name)
+    pool_info = get_pool_info(pool_name)
+    pool_id = pool_info['id']
+    url_msg = 'https://' + os.environ['PARSL_CLIENT_HOST'] +'/api/v2/resources/' + pool_id + '/sessions/' + str(session_number) + '/messages'
+    logger.info('Messages URL=<{}>'.format(url_msg))
+    res = requests.get(url_msg)
+    print(res.json())
+    return [ i['message'] for i in res.json() if 'message' in i]
+
+
+if __name__ == '__main__':
+    pool_name = 'gcpslurmv2fail'
+    a = get_resource_messages(pool_name)
+    [ print(i) for i in a ]
