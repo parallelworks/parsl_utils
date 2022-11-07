@@ -166,9 +166,9 @@ Some workflow run indefinitely like the `start_scheduler` (GT) or `start_jupyter
 
 ```
 job_number=$(basename ${PWD})
-job_id=job-${job_number}_date-$(date +%s)_random-${RANDOM}
+job_number=job-${job_number}_date-$(date +%s)_random-${RANDOM}
 # To track and cancel the job
-$@ --job_id ${job_id}
+$@ --job_number ${job_number}
 ec=$?
 main_pid=$!
 ```
@@ -181,7 +181,7 @@ pkill -P ${main_pid}
 pkill -P $$
 
 # Make super sure python process dies:
-python_pid=$(ps -x | grep  ${job_id} | grep python | awk '{print $1}')
+python_pid=$(ps -x | grep  ${job_number} | grep python | awk '{print $1}')
 if ! [ -z "${python_pid}" ]; then
     echo
     echo "Killing remaining python process ${python_pid}"

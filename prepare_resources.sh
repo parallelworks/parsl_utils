@@ -3,9 +3,9 @@ pudir=$(dirname $0)
 . ${pudir}/utils.sh
 
 if [ -z $1 ]; then
-    job_id=$(basename ${PWD}) #job-$(basename ${PWD})_date-$(date +%s)_random-${RANDOM}
+    job_number=$(basename ${PWD}) #job-$(basename ${PWD})_date-$(date +%s)_random-${RANDOM}
 else
-    job_id=$1
+    job_number=$1
 fi
 
 ssh_options="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
@@ -30,6 +30,8 @@ while IFS= read -r exec_conf; do
 
     if [ -z ${WORKER_PORT_1} ]; then
         exec_conf="${exec_conf} WORKER_PORT_1=$(getOpenPort)"
+        # Give enough time to checkout port
+        sleep 2
     fi
 
     if [ -z ${WORKER_PORT_2} ]; then
@@ -64,14 +66,14 @@ while IFS= read -r exec_conf; do
 
     # Install conda requirements if not found in remote executors
     if [[ ${INSTALL_CONDA} == true ]]; then
-        REMOTE_CONDA_YAML=/tmp/${job_id}_conda.yaml
+        REMOTE_CONDA_YAML=/tmp/${job_number}_conda.yaml
         scp ${ssh_options} ${LOCAL_CONDA_YAML} ${HOST_USER}@${HOST_IP}:${REMOTE_CONDA_YAML}
         ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${HOST_USER}@${HOST_IP} 'bash -s' < ${pudir}/install_conda_requirements.sh ${CONDA_DIR} ${CONDA_ENV} ${REMOTE_CONDA_YAML} &> logs/${LABEL}_install_conda_requirements.out
     fi
 
     # Create singularity container if not found in remote executors
     if [[ ${CREATE_SINGULARITY_CONTAINER} == true ]]; then
-        REMOTE_SINGULARITY_FILE=/tmp/${job_id}_singularity.file
+        REMOTE_SINGULARITY_FILE=/tmp/${job_number}_singularity.file
         scp ${ssh_options} ${LOCAL_SINGULARITY_FILE} ${HOST_USER}@${HOST_IP}:${REMOTE_SINGULARITY_FILE}
         ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${HOST_USER}@${HOST_IP} 'bash -s' < ${pudir}/create_singularity_container.sh ${SINGULARITY_CONTAINER_PATH} ${REMOTE_SINGULARITY_FILE} &> logs/${LABEL}_create_singularity_container.out
     fi

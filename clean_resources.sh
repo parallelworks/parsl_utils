@@ -1,10 +1,8 @@
 pudir=$(dirname $0)
 . ${pudir}/utils.sh
 
-# This file is created by ${pudir}/prepare_resources.sh
-if ! [ -f "exec_conf.export" ]; then
-    python ${pudir}/json2txt.py executors.json > exec_conf.export
-fi
+# This file is created by ${pudir}/prepare_resources.sh but needs to be updated
+python ${pudir}/json2txt.py executors.json > exec_conf.export
 
 # Cancel tunnel on the remote side only
 while IFS= read -r exec_conf; do
