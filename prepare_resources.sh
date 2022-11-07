@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 pudir=$(dirname $0)
 . ${pudir}/utils.sh
 
@@ -19,6 +20,23 @@ python ${pudir}/json2txt.py executors.json > exec_conf.export
 rm -rf exec_conf_completed.export
 while IFS= read -r exec_conf; do
     POOL=$(echo ${exec_conf} | tr ' ' '\n' | grep POOL | cut -d'=' -f2)
+    # Get resource info from the API
+    TYPE=$(${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} type)
+    if [ -z "${TYPE}" ]; then
+        echo "ERROR: Pool type not found - exiting the workflow"
+        echo "${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} type"
+        exit 1
+    fi
+    if [[ ${TYPE} == "slurmshv2" ]]; then
+        WORKDIR=$(${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} workdir)
+    else
+        WORKDIR=${HOME}
+    fi
+    if [ -z ${WORKDIR} ]; then
+        echo "ERROR: Pool workdir not found - exiting the workflow"
+        echo ${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} workdir
+        exit 1
+    fi
 
     HOST_USER=$(echo ${exec_conf} | tr ' ' '\n' | grep HOST_USER | cut -d'=' -f2)
     WORKER_PORT_1=$(echo ${exec_conf} | tr ' ' '\n' | grep WORKER_PORT_1 | cut -d'=' -f2)
@@ -26,6 +44,7 @@ while IFS= read -r exec_conf; do
 
     if [ -z ${HOST_USER} ]; then
         exec_conf="${exec_conf} HOST_USER=${PW_USER}"
+        HOST_USER=${PW_USER}
     fi
 
     if [ -z ${WORKER_PORT_1} ]; then
@@ -48,7 +67,12 @@ while IFS= read -r exec_conf; do
         fi
     fi
 
-    echo ${exec_conf} >> exec_conf_completed.export
+    # Address for SlurmProvider compute nodes to reach the interchange:
+    # This is the internal IP address of the controller node
+    ADDRESS=$(ssh -o StrictHostKeyChecking=no ${HOST_USER}@${HOST_IP} hostname -I | cut -d' ' -f1)
+    exec_conf="${exec_conf} ADDRESS=${ADDRESS}"
+
+    echo ${exec_conf} | sed "s|__poolworkdir__|${WORKDIR}|g"  >> exec_conf_completed.export
     unset HOST_IP WORKER_PORT_2 WORKER_PORT_1 HOST_USER
 
 done <  exec_conf.export

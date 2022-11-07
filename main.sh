@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 date
 
 pudir=parsl_utils #$(dirname $0)
@@ -12,6 +13,12 @@ rm -rf logs/*
 # 1. Track / cancel job
 # 2. Stage temporary files
 job_number=$(basename ${PWD})   #job-${job_num}_date-$(date +%s)_random-${RANDOM}
+wfargs="$@ --job_number ${job_number}"
+
+# Replace special placeholders:
+wfargs="$(echo ${wfargs} | sed "s|__job_number__|${job_number}|g")"
+sed -i "s|__job_number__|${job_number}|g" executors.json
+sed -i "s|__job_number__|${job_number}|g" kill.sh
 
 #########################################
 # CHECKING AND PREPARING USER CONTAINER #
@@ -45,9 +52,9 @@ bash ${pudir}/prepare_resources.sh ${job_number} &> logs/prepare_resources.out
 ####################
 echo; echo; echo
 echo "RUNNING PARSL JOB"
-echo "python main.py $@ --job_number ${job_number}"
+echo "python main.py ${wfargs}"
 # To track and cancel the job
-python main.py $@ --job_number ${job_number}
+python main.py ${wfargs}
 ec=$?
 main_pid=$!
 echo; echo; echo
@@ -55,19 +62,10 @@ echo; echo; echo
 ##########################
 # CLEAN REMOTE EXECUTORS #
 ##########################
-bash ${pudir}/clean_resources.sh &> logs/clean_resources.out
+bash kill.sh
 
-#########################
-# CLEAN LOCAL PROCESSES #
-#########################
-
-# Make super sure python process dies:
-# - Also the monitoring is killed here!
-python_pid=$(ps -x | grep  ${job_number} | grep python | awk '{print $1}')
-if ! [ -z "${python_pid}" ]; then
-    echo "Killing remaining python process ${python_pid}" >> logs/killed_pids.log
-    kill ${python_pid}
-fi
-
+##########################
+# Exit                   #
+##########################
 echo Exit code ${ec}
 exit ${ec}
