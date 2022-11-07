@@ -42,11 +42,6 @@ while IFS= read -r exec_conf; do
     WORKER_PORT_1=$(echo ${exec_conf} | tr ' ' '\n' | grep WORKER_PORT_1 | cut -d'=' -f2)
     WORKER_PORT_2=$(echo ${exec_conf} | tr ' ' '\n' | grep WORKER_PORT_2 | cut -d'=' -f2)
 
-    if [ -z ${HOST_USER} ]; then
-        exec_conf="${exec_conf} HOST_USER=${PW_USER}"
-        HOST_USER=${PW_USER}
-    fi
-
     if [ -z ${WORKER_PORT_1} ]; then
         exec_conf="${exec_conf} WORKER_PORT_1=$(getOpenPort)"
         # Give enough time to checkout port
@@ -59,12 +54,22 @@ while IFS= read -r exec_conf; do
 
     if [ -z ${HOST_IP} ]; then
         HOST_IP=$(${CONDA_PYTHON_EXE} /swift-pw-bin/utils/cluster-ip-api-wrapper.py ${POOL}.clusters.pw)
-        exec_conf="${exec_conf} HOST_IP=${HOST_IP}"
         # When the ip-api-wrapper times out it returns the pool name
         if [ -z ${HOST_IP} ] || [[ "${HOST_IP}" == "${POOL}" ]]; then
             echo "ERROR: Host IP <${HOST_IP}> for pool <${POOL}> wast not found! Exiting workflow"
             exit 1
         fi
+        # Sometimes host_ip as returned by the API is in the format USER@IP and sometimes it is not.
+        if [[ ${HOST_IP} == *"@"* ]]; then
+            HOST_USER=$(echo ${HOST_IP} | cut -d'@' -f1)
+            HOST_IP=$(echo ${HOST_IP} | cut -d'@' -f2)
+        fi
+        exec_conf="${exec_conf} HOST_IP=${HOST_IP}"
+    fi
+
+    if [ -z ${HOST_USER} ]; then
+        exec_conf="${exec_conf} HOST_USER=${PW_USER}"
+        HOST_USER=${PW_USER}
     fi
 
     # Address for SlurmProvider compute nodes to reach the interchange:
