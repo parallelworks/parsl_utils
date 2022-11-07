@@ -74,7 +74,7 @@ while IFS= read -r exec_conf; do
 
     # Address for SlurmProvider compute nodes to reach the interchange:
     # This is the internal IP address of the controller node
-    ADDRESS=$(ssh -o StrictHostKeyChecking=no ${HOST_USER}@${HOST_IP} hostname -I | cut -d' ' -f1)
+    ADDRESS=$(ssh -o StrictHostKeyChecking=no ${HOST_USER}@${HOST_IP} hostname -I < /dev/null | cut -d' ' -f1)
     exec_conf="${exec_conf} ADDRESS=${ADDRESS}"
 
     echo ${exec_conf} | sed "s|__poolworkdir__|${WORKDIR}|g"  >> exec_conf_completed.export
