@@ -70,7 +70,7 @@ while IFS= read -r exec_conf; do
     if [ -z ${HOST_USER} ]; then
         HOST_USER=${PW_USER}
     fi
-    exec_conf="${exec_conf} HOST_USER=${PW_USER}"
+    exec_conf="${exec_conf} HOST_USER=${HOST_USER}"
 
     # Address for SlurmProvider compute nodes to reach the interchange:
     # This is the internal IP address of the controller node
