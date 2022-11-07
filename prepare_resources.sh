@@ -83,6 +83,7 @@ while IFS= read -r exec_conf; do
 done <  exec_conf.export
 
 # Convert executor configuration to JSON
+cp executors.json executors.orig.json
 python ${pudir}/json2txt.py exec_conf_completed.export > executors.json
 
 
