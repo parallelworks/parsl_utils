@@ -2,8 +2,14 @@
 set -x
 date
 
+# Confirm parsl_utils is cloned
+git clone https://github.com/parallelworks/parsl_utils.git parsl_utils
+
 pudir=parsl_utils #$(dirname $0)
 . ${pudir}/utils.sh
+
+# Copy the kill file
+cp parsl_utils/kill.sh ./
 
 # Clear logs
 mkdir -p logs
