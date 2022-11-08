@@ -67,10 +67,11 @@ def _stage_output(ioval, host):
             global_path = os.path.dirname(global_path)
 
         # Remove q from avzq to get rsync output
-        cmd = 'rsync -avzq {host}:{worker_path} {global_path}'.format(
+        cmd = 'mkdir -p {root_path} && rsync -avzq {host}:{worker_path} {global_path}'.format(
             global_path = global_path,
             host = host,
-            worker_path = ioval['worker_path']
+            worker_path = ioval['worker_path'],
+            root_path = os.path.dirname(global_path)
         )
 
     if ioval['global_path'].startswith('gs://'):
