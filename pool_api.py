@@ -30,6 +30,8 @@ if __name__ == '__main__':
 
     if pool_prop == "type":
         print(pool_info['type'])
+    elif pool_prop == "status":
+        print(pool_info['status'])
     elif pool_prop == "workdir":
         print(json.loads(pool_info['coasterproperties'])['workdir'])
     else:
