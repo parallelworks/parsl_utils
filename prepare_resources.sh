@@ -19,15 +19,25 @@ ssh_options="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 python ${pudir}/json2txt.py executors.json > exec_conf.export
 rm -rf exec_conf_completed.export
 while IFS= read -r exec_conf; do
+
     POOL=$(echo ${exec_conf} | tr ' ' '\n' | grep POOL | cut -d'=' -f2)
+
+    echo PREPPING $POOL
+
     # Get resource info from the API
     TYPE=$(${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} type)
     if [ -z "${TYPE}" ]; then
         echo "ERROR: Pool type not found - exiting the workflow"
         echo "${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} type"
-        continue
-        #exit 1
+        exit 1
     fi
+
+    STATUS=$(${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} status)
+    if [[ ${STATUS} == "off" ]]; then
+        echo "ERROR: Pool status is off - continuing to next pool"
+        continue
+    fi
+
     if [[ ${TYPE} == "slurmshv2" ]]; then
         WORKDIR=$(${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} workdir)
     else
@@ -36,8 +46,7 @@ while IFS= read -r exec_conf; do
     if [ -z ${WORKDIR} ]; then
         echo "ERROR: Pool workdir not found - exiting the workflow"
         echo ${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} workdir
-        continue
-        #exit 1
+        exit 1
     fi
 
     HOST_USER=$(echo ${exec_conf} | tr ' ' '\n' | grep HOST_USER | cut -d'=' -f2)
