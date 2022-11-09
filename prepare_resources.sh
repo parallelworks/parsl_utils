@@ -25,7 +25,8 @@ while IFS= read -r exec_conf; do
     if [ -z "${TYPE}" ]; then
         echo "ERROR: Pool type not found - exiting the workflow"
         echo "${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} type"
-        exit 1
+        continue
+        #exit 1
     fi
     if [[ ${TYPE} == "slurmshv2" ]]; then
         WORKDIR=$(${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} workdir)
@@ -35,7 +36,8 @@ while IFS= read -r exec_conf; do
     if [ -z ${WORKDIR} ]; then
         echo "ERROR: Pool workdir not found - exiting the workflow"
         echo ${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} workdir
-        exit 1
+        continue
+        #exit 1
     fi
 
     HOST_USER=$(echo ${exec_conf} | tr ' ' '\n' | grep HOST_USER | cut -d'=' -f2)
@@ -57,7 +59,8 @@ while IFS= read -r exec_conf; do
         # When the ip-api-wrapper times out it returns the pool name
         if [ -z ${HOST_IP} ] || [[ "${HOST_IP}" == "${POOL}" ]]; then
             echo "ERROR: Host IP <${HOST_IP}> for pool <${POOL}> wast not found! Exiting workflow"
-            exit 1
+            #exit 1
+            continue
         fi
         # Sometimes host_ip as returned by the API is in the format USER@IP and sometimes it is not.
         if [[ ${HOST_IP} == *"@"* ]]; then
