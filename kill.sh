@@ -3,6 +3,8 @@ job_number=__job_number__
 # WARNING: kill.sh is not always called from /pw/jobs/<job_number> !!
 # https://github.com/parallelworks/issues/issues/535
 pudir=/pw/jobs/${job_number}/parsl_utils
+cd /pw/jobs/${job_number}
+
 ##########################
 # CLEAN REMOTE EXECUTORS #
 ##########################

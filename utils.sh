@@ -27,38 +27,7 @@ find_available_port_pair () {
     done
 }
 
-ssh_establish_tunnel_to_head_node() {
-    HOST_IP=$1
-    HOST_USER=$2
-    port_1=$3
-    port_2=$4
-    int_ip=$(hostname -I | cut -d' ' -f1 | sed "s/ //g")
-    u=${PW_USER}
-    s=${PW_USER_HOST}
-    USER_CONTAINER_HOST="usercontainer"
-    # Old command
-    #tunnel_cmd="sudo -E -u ${HOST_USER} bash -c \"setsid ssh ${ssh_options} -L 0.0.0.0:${port_1}:${int_ip}:${port_1} -L 0.0.0.0:${port_2}:${int_ip}:${port_2} ${u}@${s} -fNT\""
-    #echo ${tunnel_cmd} > establish_tunnel_to_head_node.sh
-    #ssh ${ssh_options} ${HOST_USER}@${HOST_IP} -t 'sudo bash -s' < establish_tunnel_to_head_node.sh
-    # Does not work with -R
-    #tunnel_cmd="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -R 0.0.0.0:${port_1}:localhost:${port_1} -R 0.0.0.0:${port_2}:localhost:${port_2} ${USER_CONTAINER_HOST}"
-    tunnel_cmd="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -L 0.0.0.0:${port_1}:localhost:${port_1} -L 0.0.0.0:${port_2}:localhost:${port_2} ${USER_CONTAINER_HOST}"
-    echo screen -d -m ${tunnel_cmd} > establish_tunnel_to_head_node.sh
-    ssh ${ssh_options} ${HOST_USER}@${HOST_IP} -t 'bash -s' < establish_tunnel_to_head_node.sh
-}
 
-ssh_cancel_tunnel_to_head_node() {
-    HOST_IP=$1
-    HOST_USER=$2
-    port_1=$3
-    port_2=$4
-    int_ip=$(hostname -I | cut -d' ' -f1 | sed "s/ //g")
-    u=${PW_USER}
-    s=${PW_USER_HOST}
-    tunnel_cmd="kill \$(ps -x | grep ssh | grep ${port_1} | awk '{print \$1}')"
-    echo ${tunnel_cmd} > cancel_tunnel_to_head_node.sh
-    ssh ${ssh_options} ${HOST_USER}@${HOST_IP} -t 'bash -s' < cancel_tunnel_to_head_node.sh
-}
 
 # Exports inputs in the format
 # --a 1 --b 2 --c 3
@@ -107,4 +76,20 @@ getOpenPort() {
         done
     fi
     echo $openPort
+}
+
+
+# GET SLURM JOB NAMES
+# FIXME: Need to test PBS + SLURM jobs!
+get_slurm_job_names() {
+    job_names=""
+    if [ -d "runinfo" ]; then
+        # GET LATEST RUNINFO DIRECTORY
+        # - Example: 000 or 001
+        run_info_000=$(ls -t runinfo/ | head -n1)
+        if [ -d "runinfo/${run_info_000}/submit_scripts/" ]; then
+            job_names=$(cat runinfo/${run_info_000}/submit_scripts/*.submit | grep job-name | cut -d'=' -f2)
+        fi
+    fi
+    echo ${job_names} | tr ' ' '|'
 }
