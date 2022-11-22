@@ -48,7 +48,8 @@ def stage_app(host):
 def log_app(func):
     def wrapper(*args, **kwargs):
         if args:
-            print("\nARGS:\n{}".format(" ".join(args)), flush = True)
+            args_str = [str(arg) for arg in args]
+            print("\nARGS:\n{}".format(" ".join(args_str)), flush = True)
 
         if 'inputs' in kwargs:
             print('\nINPUTS:\n' + '\n'.join([v.path for v in kwargs['inputs']]), flush = True)
