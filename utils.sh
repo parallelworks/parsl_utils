@@ -56,10 +56,10 @@ f_read_cmd_args(){
 # - try end point
 # - if not works --> use random
 getOpenPort() {
-    minPort=50000
-    maxPort=50500
+    minPort=60000
+    maxPort=60500
 
-    openPort=$(curl -s "https://${PW_USER_HOST}/api/v2/usercontainer/getSingleOpenPort?minPort=${minPort}&maxPort=${maxPort}&key=${PW_API_KEY}")
+    openPort=$(curl -s "https://${PARSL_CLIENT_HOST}/api/v2/usercontainer/getSingleOpenPort?minPort=${minPort}&maxPort=${maxPort}&key=${PW_API_KEY}")
     # Check if openPort variable is a port
     if ! [[ ${openPort} =~ ^[0-9]+$ ]] ; then
         qty=1
