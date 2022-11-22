@@ -13,7 +13,7 @@ while IFS= read -r exec_conf; do
     export ${exec_conf}
 
     if [[ ${JOB_SCHEDULER_TYPE} == "SLURM" ]]; then
-        JOB_NAMES=get_slurm_job_names()
+        JOB_NAMES=$(get_slurm_job_names)
     fi
 
     sed \
