@@ -4,7 +4,7 @@ set -x
 job_number=__job_number__
 WORKER_PORT_1=__WORKER_PORT_1__
 JOB_SCHEDULER_TYPE=__JOB_SCHEDULER_TYPE__
-JOB_NAMES=__JOB_NAMES__
+JOB_NAMES="__JOB_NAMES__"
 
 echo "Cleaning resource ${HOSTNAME}"
 
