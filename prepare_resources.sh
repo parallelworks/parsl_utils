@@ -26,7 +26,7 @@ python ${pudir}/json2txt.py executors.json > exec_conf.export
 rm -rf exec_conf_completed.export
 while IFS= read -r exec_conf; do
     export ${exec_conf}
-    echo PREPPING $POOL
+    echo "Completeting configuration for executor <${LABEL}>"
 
     # Get resource info from the API
     TYPE=$(${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} type)
@@ -132,6 +132,7 @@ python ${pudir}/json2txt.py exec_conf_completed.export > executors.json
 # TODO: Consider using CSSH or PSSH here?
 while IFS= read -r exec_conf; do
     export ${exec_conf}
+    echo "Preparing executor <${LABEL}>"
     mkdir -p ${LABEL}
 
     # This is needed for SSHChannel in Parsl
