@@ -132,7 +132,7 @@ python ${pudir}/json2txt.py exec_conf_completed.export > executors.json
 # TODO: Consider using CSSH or PSSH here?
 while IFS= read -r exec_conf; do
     export ${exec_conf}
-    mkdir -p ${POOL}
+    mkdir -p ${LABEL}
 
     # This is needed for SSHChannel in Parsl
     ssh-keygen -f "/home/${PW_USER}/.ssh/known_hosts" -R ${HOST_IP}
