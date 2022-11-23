@@ -55,9 +55,9 @@ bash ${pudir}/prepare_resources.sh ${job_number} &> logs/prepare_resources.out
 ####################
 echo; echo; echo
 echo "RUNNING PARSL JOB"
-echo "python main.py ${wfargs}"
+echo "python -u main.py ${wfargs}"
 # To track and cancel the job
-python main.py ${wfargs}
+python -u main.py ${wfargs}
 ec=$?
 main_pid=$!
 echo; echo; echo
