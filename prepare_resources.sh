@@ -123,12 +123,12 @@ while IFS= read -r exec_conf; do
     unset HOST_IP WORKER_PORT_2 WORKER_PORT_1 HOST_USER RUN_DIR
 
 done <  exec_conf.export
-# Make sure exec_conf_completed.export ends in new line
-echo >>  exec_conf_completed.export
-
 # Convert executor configuration to JSON
 cp executors.json executors.orig.json
 python ${pudir}/json2txt.py exec_conf_completed.export > executors.json
+
+# Make sure exec_conf_completed.export ends in new line
+echo >>  exec_conf_completed.export
 
 # TODO: Consider using CSSH or PSSH here?
 while IFS= read -r exec_conf; do
