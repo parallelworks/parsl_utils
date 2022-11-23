@@ -21,7 +21,7 @@ while IFS= read -r exec_conf; do
         -e "s|__WORKER_PORT_1__|${WORKER_PORT_1}|g" \
         -e "s|__JOB_SCHEDULER_TYPE__|${JOB_SCHEDULER_TYPE}|g" \
         -e "s/__JOB_NAMES__/${JOB_NAMES}/g" \
-        ${pudir}/clean_remote_resource.sh > ${POOL}/clean_remote_resource.sh
+        ${pudir}/clean_remote_resource.sh > ${LABEL}/clean_remote_resource.sh
 
-    ssh ${ssh_options} ${HOST_USER}@${HOST_IP} 'bash -s' < ${POOL}/clean_remote_resource.sh &> ${POOL}/clean_remote_resource.out
+    ssh ${ssh_options} ${HOST_USER}@${HOST_IP} 'bash -s' < ${LABEL}/clean_remote_resource.sh &> ${LABEL}/clean_remote_resource.out
 done <  exec_conf_completed.export
