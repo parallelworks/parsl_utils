@@ -164,10 +164,10 @@ while IFS= read -r exec_conf; do
         -e "s|__REMOTE_SINGULARITY_FILE__|${REMOTE_SINGULARITY_FILE}|g" \
         -e "s|__WORKER_PORT_1__|${WORKER_PORT_1}|g" \
         -e "s|__WORKER_PORT_2__|${WORKER_PORT_2}|g" \
-        ${pudir}/prepare_remote_resource.sh > ${POOL}/prepare_remote_resource.sh
+        ${pudir}/prepare_remote_resource.sh > ${LABEL}/prepare_remote_resource.sh
 
     # Prepare remote resource:
-    ssh ${ssh_options} ${HOST_USER}@${HOST_IP} 'bash -s' < ${POOL}/prepare_remote_resource.sh &> ${POOL}/prepare_remote_resource.out
+    ssh ${ssh_options} ${HOST_USER}@${HOST_IP} 'bash -s' < ${LABEL}/prepare_remote_resource.sh &> ${LABEL}/prepare_remote_resource.out
 
     unset INSTALL_CONDA REMOTE_CONDA_YAML CREATE_SINGULARITY_CONTAINER REMOTE_SINGULARITY_FILE
 
