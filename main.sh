@@ -12,6 +12,11 @@ cp parsl_utils/kill.sh ./
 mkdir -p logs
 rm -rf logs/*
 
+# replace the executors file if an override exists
+if [ -f "executors.override.json" ];then
+    cp executors.override.json executors.json
+fi
+
 # Use a job_number to:
 # 1. Track / cancel job
 # 2. Stage temporary files
