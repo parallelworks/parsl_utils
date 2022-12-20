@@ -97,7 +97,7 @@ while IFS= read -r exec_conf; do
         HOST_IP=$(${CONDA_PYTHON_EXE} /swift-pw-bin/utils/cluster-ip-api-wrapper.py ${POOL}.clusters.pw)
         # When the ip-api-wrapper times out it returns the pool name
         if [ -z ${HOST_IP} ] || [[ "${HOST_IP}" == "${POOL}" ]]; then
-            echo "ERROR: Host IP <${HOST_IP}> for pool <${POOL}> wast not found! Exiting workflow"\
+            echo "ERROR: Host IP <${HOST_IP}> for pool <${POOL}> wast not found! Exiting workflow"
             bash ${kill_sh}
             exit 1
         fi
@@ -116,7 +116,15 @@ while IFS= read -r exec_conf; do
 
     # Address for SlurmProvider compute nodes to reach the interchange:
     # This is the internal IP address of the controller node
-    ADDRESS=$(ssh -o StrictHostKeyChecking=no ${HOST_USER}@${HOST_IP} hostname -I < /dev/null | cut -d' ' -f1)
+    ADDRESS=$(${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} interalIp)
+    if [ -z ${ADDRESS} ]; then
+        ADDRESS=$(ssh -o StrictHostKeyChecking=no ${HOST_USER}@${HOST_IP} hostname -I < /dev/null | cut -d' ' -f1)
+    fi
+    if [ -z ${ADDRESS} ]; then
+        echo "ERROR: Internal IP address not found for controller node"
+        bash ${kill_sh}
+        exit 1  
+    fi
     exec_conf="${exec_conf} ADDRESS=${ADDRESS}"
 
     echo ${exec_conf} | sed "s|__POOLWORKDIR__|${WORKDIR}|g" | sed "s|__USER__|${PW_USER}|g"  >> exec_conf_completed.export
