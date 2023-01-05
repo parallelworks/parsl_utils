@@ -79,17 +79,35 @@ getOpenPort() {
 }
 
 
-# GET SLURM JOB NAMES
-# FIXME: Need to test PBS + SLURM jobs!
-get_slurm_job_names() {
-    job_names=""
+export_runinfo_dir() {
     if [ -d "runinfo" ]; then
         # GET LATEST RUNINFO DIRECTORY
         # - Example: 000 or 001
-        run_info_000=$(ls -t runinfo/ | head -n1)
-        if [ -d "runinfo/${run_info_000}/submit_scripts/" ]; then
-            job_names=$(cat runinfo/${run_info_000}/submit_scripts/*.submit | grep job-name | cut -d'=' -f2)
-        fi
+        export RUNINFO_DIR=$(ls -t runinfo/ | head -n1)
+    else
+       echo "ERROR: No runinfo directory found"
     fi
-    echo ${job_names} | tr ' ' '|'
+}
+
+export_scheduler_type_from_resource_logs() {
+    SCHEDULER_TYPE=$(cat ${POOL}/prepare_remote_resource.out | grep SCHEDULER_TYPE | cut -d'=' -f2)
+    export SCHEDULER_TYPE=${SCHEDULER_TYPE}
+}
+
+# GET SLURM JOB NAMES
+# FIXME: Need to test PBS + SLURM jobs!
+export_job_names() {
+    job_names=""
+    if [ -d "runinfo/${RUNINFO_DIR}/submit_scripts/" ]; then
+        SLURM_JOB_NAMES=$(cat runinfo/${RUNINFO_DIR}/submit_scripts/*.submit | grep job-name | cut -d'=' -f2)
+        PBS_JOB_NAMES=$(cat runinfo/${RUNINFO_DIR}/submit_scripts/*.submit | grep \#PBS | grep -- -N | cut -d' ' -f3)
+    else
+        echo "ERROR: directory runinfo/${RUNINFO_DIR}/submit_scripts/ not found"
+    fi
+    SLURM_JOB_NAMES=$(echo ${SLURM_JOB_NAMES} | tr ' ' '|')
+    PBS_JOB_NAMES=$(echo ${PBS_JOB_NAMES} | tr ' ' '|')
+
+    export SLURM_JOBS=${SLURM_JOB_NAMES}
+    export PBS_JOB_NAMES=${PBS_JOB_NAMES}
+
 }
