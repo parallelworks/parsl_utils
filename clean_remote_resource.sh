@@ -23,7 +23,8 @@ fi
 if [[ "${JOB_SCHEDULER_TYPE}" == "PBS" ]]; then
     # KILL SLURM JOBS
     for JOB_NAME in $(echo ${JOB_NAMES} | tr '|' ' '); do
-        JOB_ID=$(qstat | grep ${JOB_NAME} | awk '{print $1}')
+        # qstat abreviates jobnames...
+        JOB_ID=$(qstat | grep ${JOB_NAME: -13} | awk '{print $1}')
         # Note that these are all the parsl jobs in runinfo/000/submit_scripts and may not be
         # running in this particular resource.
         if ! [ -z ${JOB_ID} ]; then
