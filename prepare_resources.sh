@@ -117,7 +117,12 @@ while IFS= read -r exec_conf; do
     # Address for SlurmProvider compute nodes to reach the interchange:
     # This is the internal IP address of the controller node
     ADDRESS=$(${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} internalIp)
+    if [[ "${ADDRESS}" != "" ]] && [[ "${ADDRESS}" != *"."* ]];then
+        # use the interface name instead of the ip address
+        ADDRESS=$(ssh -o StrictHostKeyChecking=no ${HOST_USER}@${HOST_IP} "ifconfig ${ADDRESS} | sed -En -e 's/.*inet ([0-9.]+).*/\1/p'")
+    fi
     if [ -z ${ADDRESS} ]; then
+        # use the default hostname -I first listing
         ADDRESS=$(ssh -o StrictHostKeyChecking=no ${HOST_USER}@${HOST_IP} hostname -I < /dev/null | cut -d' ' -f1)
     fi
     if [ -z ${ADDRESS} ]; then
