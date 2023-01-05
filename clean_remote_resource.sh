@@ -12,7 +12,6 @@ if [[ "${JOB_SCHEDULER_TYPE}" == "SLURM" ]]; then
     # KILL SLURM JOBS
     for JOB_NAME in $(echo ${JOB_NAMES} | tr '|' ' '); do
         JOB_ID=$(squeue --name ${JOB_NAME}  -h | awk '{print $1}')
-        echo ${slurm_job_names}
         # Note that these are all the parsl jobs in runinfo/000/submit_scripts and may not be
         # running in this particular resource.
         if ! [ -z ${JOB_ID} ]; then
@@ -20,6 +19,20 @@ if [[ "${JOB_SCHEDULER_TYPE}" == "SLURM" ]]; then
         fi
     done
 fi
+
+if [[ "${JOB_SCHEDULER_TYPE}" == "PBS" ]]; then
+    # KILL SLURM JOBS
+    for JOB_NAME in $(echo ${JOB_NAMES} | tr '|' ' '); do
+        JOB_ID=$(qstat | grep ${JOB_NAME} | awk '{print $1}')
+        # Note that these are all the parsl jobs in runinfo/000/submit_scripts and may not be
+        # running in this particular resource.
+        if ! [ -z ${JOB_ID} ]; then
+            qdel ${JOB_ID}
+        fi
+    done
+fi
+
+
 
 # Kill tunnel processes
 kill $(ps -x | grep ssh | grep ${WORKER_PORT_1} | awk '{print $1}')
