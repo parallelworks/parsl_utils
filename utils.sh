@@ -90,8 +90,8 @@ export_runinfo_dir() {
 }
 
 export_scheduler_type_from_resource_logs() {
-    SCHEDULER_TYPE=$(cat ${POOL}/prepare_remote_resource.out | grep SCHEDULER_TYPE | cut -d'=' -f2)
-    export SCHEDULER_TYPE=${SCHEDULER_TYPE}
+    JOB_SCHEDULER_TYPE=$(cat ${POOL}/prepare_remote_resource.out | grep SCHEDULER_TYPE | cut -d'=' -f2)
+    export JOB_SCHEDULER_TYPE=${JOB_SCHEDULER_TYPE}
 }
 
 # GET SLURM JOB NAMES
@@ -107,7 +107,7 @@ export_job_names() {
     SLURM_JOB_NAMES=$(echo ${SLURM_JOB_NAMES} | tr ' ' '|')
     PBS_JOB_NAMES=$(echo ${PBS_JOB_NAMES} | tr ' ' '|')
 
-    export SLURM_JOBS=${SLURM_JOB_NAMES}
+    export SLURM_JOB_NAMES=${SLURM_JOB_NAMES}
     export PBS_JOB_NAMES=${PBS_JOB_NAMES}
 
 }

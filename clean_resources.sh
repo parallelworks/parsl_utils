@@ -8,12 +8,17 @@ else
     job_number=$1
 fi
 
+export_runinfo_dir
+export_job_names # PBS_JOB_NAMES and SLURM_JOB_NAMES
 # Cancel tunnel on the remote side only
 while IFS= read -r exec_conf; do
     export ${exec_conf}
+    export_scheduler_type_from_resource_logs
 
     if [[ ${JOB_SCHEDULER_TYPE} == "SLURM" ]]; then
-        JOB_NAMES=$(get_slurm_job_names)
+        JOB_NAMES=${SLURM_JOB_NAMES}
+    elif [[ ${JOB_SCHEDULER_TYPE} == "PBS" ]]; then
+        JOB_NAMES=${PBS_JOB_NAMES}
     fi
 
     sed \
