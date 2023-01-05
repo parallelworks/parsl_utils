@@ -56,5 +56,9 @@ if [[ ${CREATE_SINGULARITY_CONTAINER} == "true" ]]; then
     fi
 fi
 
+echo 
+echo HOSTNAME: $HOSTNAME
+echo 
+
 # ESTABLISH TUNNELS
-screen -d -m ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -L 0.0.0.0:${WORKER_PORT_1}:localhost:${WORKER_PORT_1} -L 0.0.0.0:${WORKER_PORT_2}:localhost:${WORKER_PORT_2} ${USER_CONTAINER_HOST}
+screen -d -L -m ssh -vvv -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -L 0.0.0.0:${WORKER_PORT_1}:localhost:${WORKER_PORT_1} -L 0.0.0.0:${WORKER_PORT_2}:localhost:${WORKER_PORT_2} ${USER_CONTAINER_HOST} 2>&1
