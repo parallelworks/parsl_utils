@@ -19,6 +19,14 @@ WORKER_PORT_2=__WORKER_PORT_2__
 # WONT WORK IN EINSTEINMED:
 USER_CONTAINER_HOST="usercontainer"
 
+# PRINT SCHEDULER TYPE (Needed to clean jobs)
+# FIXME: This info should be included in the resource definition page
+if ! [ -z $(which sbatch 2> /dev/null) ]; then
+    echo "SCHEDULER_TYPE=SLURM"
+elif ! [ -z $(which qsub 2> /dev/null) ]; then
+    echo "SCHEDULER_TYPE=PBS"
+fi
+
 f_install_miniconda() {
     install_dir=$1
     echo "Installing Miniconda3-py39_4.9.2"

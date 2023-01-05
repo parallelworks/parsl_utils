@@ -3,10 +3,6 @@ set -x
 pudir=$(dirname $0)
 . ${pudir}/utils.sh
 
-slurmpooltypes="gclusterv2 pclusterv2 azclusterv2 awsclusterv2 slurmshv2"
-pbspooltypes="pbsshv2"
-
-
 if [ -z $1 ]; then
     job_number=$(basename ${PWD}) #job-$(basename ${PWD})_date-$(date +%s)_random-${RANDOM}
 else
@@ -37,16 +33,6 @@ while IFS= read -r exec_conf; do
         exit 1
     fi
     exec_conf="${exec_conf} POOL_TYPE=${TYPE}"
-
-    if [[ " ${slurmpooltypes} " == *" ${TYPE} "* ]]; then
-        JOB_SCHEDULER_TYPE=SLURM
-    elif [[ " ${pbspooltypes} " == *" ${TYPE} "* ]]; then
-        JOB_SCHEDULER_TYPE=PBS
-    else
-        echo "ERROR: Pool type <${TYPE}> not present in SLURM types <${slurmpooltypes}> or PBS types <${pbspooltypes}>"
-        exit 1
-    fi
-    exec_conf="${exec_conf} JOB_SCHEDULER_TYPE=${JOB_SCHEDULER_TYPE}"
 
     STATUS=$(${CONDA_PYTHON_EXE} ${pudir}/pool_api.py ${POOL} status)
     if [[ ${STATUS} == "off" ]]; then
