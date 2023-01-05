@@ -90,7 +90,7 @@ export_runinfo_dir() {
 }
 
 export_scheduler_type_from_resource_logs() {
-    JOB_SCHEDULER_TYPE=$(cat ${POOL}/prepare_remote_resource.out | grep SCHEDULER_TYPE | cut -d'=' -f2)
+    JOB_SCHEDULER_TYPE=$(cat ${LABEL}/prepare_remote_resource.out | grep SCHEDULER_TYPE | cut -d'=' -f2)
     export JOB_SCHEDULER_TYPE=${JOB_SCHEDULER_TYPE}
 }
 
