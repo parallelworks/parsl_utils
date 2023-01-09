@@ -58,6 +58,8 @@ while IFS= read -r exec_conf; do
         bash ${kill_sh}
         exit 1
     fi
+    exec_conf="${exec_conf} WORKDIR=${WORKDIR}"
+
 
     if [ -z ${RUN_DIR} ]; then
         RUN_DIR=${WORKDIR}/pw/jobs/${job_number}
