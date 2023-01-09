@@ -5,13 +5,15 @@ from time import sleep
 import logging
 import glob
 
+log_file = os.path.join('logs', os.path.basename(__file__).replace('py', 'log'))
+os.makedirs(os.path.dirname(log_file), exist_ok = True)
 
 ## NOTES:
 # NO PRINT STATEMENTS ALLOWED!!
 # PARSL WONT WORK WITH POOLNAME.CLUSTERS.PW!!
 
 logging.basicConfig(
-    filename = os.path.join('logs', os.path.basename(__file__).replace('py', 'log')),
+    filename = log_file,
     format = '%(asctime)s %(levelname)-8s %(message)s',
     datefmt ='%Y-%m-%d %H:%M:%S',
     level = logging.INFO
