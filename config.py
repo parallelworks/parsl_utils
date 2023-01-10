@@ -111,7 +111,7 @@ for exec_label, exec_conf_i in exec_conf.items():
             worker_logdir_root = exec_conf[exec_label]['WORKER_LOGDIR_ROOT'],
             address = exec_conf[exec_label]['ADDRESS'],
             provider = provider,
-            storage_access=[ 
+            storage_access = [ 
                 RSyncStaging('usercontainer'), 
                 PWRSyncStaging('usercontainer')
             ]
