@@ -4,12 +4,11 @@ from . import rsync
 from . import gsutil
 
 
-def PWFile(path, local_path, scheme, netloc = None):
-    # Set isdir = True if the file is a directory!
-    f = File(path)
+def PWFile(path, local_path, scheme, netloc):
+    if netloc.startswith('/'):
+        raise Exception('ERROR: netloc cannot start with /')
+
+    url = scheme + '://' + netloc + '/' + path
+    f = File(url)
     f.local_path = local_path
-    f.path = path
-    f.scheme = scheme
-    if netloc:
-        f.netloc = netloc
     return f
