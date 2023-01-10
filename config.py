@@ -5,6 +5,7 @@ from parsl.executors import HighThroughputExecutor
 #from parsl.monitoring.monitoring import MonitoringHub
 from parsl.addresses import address_by_hostname
 from parsl.data_provider.rsync import RSyncStaging
+from parsl.data_provider.gsutil import PWGsutil
 
 import os
 import json

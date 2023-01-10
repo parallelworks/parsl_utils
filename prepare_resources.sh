@@ -161,7 +161,9 @@ while IFS= read -r exec_conf; do
     fi
 
     # Copy parsl utils to the run directory. This is needed to be able to use custom staging providers
-    scp -r ${ssh_options} parsl_utils ${HOST_USER}@${HOST_IP}:${RUN_DIR}
+    if [[ ${STAGE_PARSL_UTILS} == "true" ]]; then
+        scp -r ${ssh_options} parsl_utils ${HOST_USER}@${HOST_IP}:${RUN_DIR}
+    fi
 
     # Create bootstrap script
     sed \
