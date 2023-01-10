@@ -9,6 +9,12 @@ logger = logging.getLogger(__name__)
 
 class PWRSyncStaging(Staging, RepresentationMixin):
     """
+    This is a modification of the official staging provider 
+    https://parsl.readthedocs.io/en/latest/stubs/parsl.data_provider.rsync.RSyncStaging.html
+    with two changes:
+        1. Add -avzq option to rsync
+        2. Make parent directory of file.path if it does not exist
+
     This staging provider will execute rsync on worker nodes
     to stage in files from a remote location.
     Worker nodes must be able to authenticate to the rsync server
