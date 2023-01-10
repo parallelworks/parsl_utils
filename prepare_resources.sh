@@ -160,6 +160,9 @@ while IFS= read -r exec_conf; do
         scp ${ssh_options} ${LOCAL_SINGULARITY_FILE} ${HOST_USER}@${HOST_IP}:${REMOTE_SINGULARITY_FILE}
     fi
 
+    # Copy parsl utils to the run directory. This is needed to be able to use custom staging providers
+    scp -r ${ssh_options} parsl_utils ${HOST_USER}@${HOST_IP}:${RUN_DIR}
+
     # Create bootstrap script
     sed \
         -e "s|__job_number__|${job_number}|g" \
