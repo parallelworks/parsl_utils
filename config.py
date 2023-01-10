@@ -5,13 +5,13 @@ from parsl.executors import HighThroughputExecutor
 #from parsl.monitoring.monitoring import MonitoringHub
 from parsl.addresses import address_by_hostname
 from parsl.data_provider.rsync import RSyncStaging
-from parsl.data_provider.gsutil import PWGsutil
 
 import os
 import json
 
 import parsl_utils
 from parsl_utils.data_provider.rsync import PWRSyncStaging
+from parsl_utils.data_provider.gsutil import PWGsutil
 
 
 # Need to name the job to be able to remove it with clean_resources.sh!
