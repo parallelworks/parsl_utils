@@ -105,6 +105,7 @@ for exec_label, exec_conf_i in exec_conf.items():
             )),
             label = exec_label,
             worker_debug = True,             # Default False for shorter logs
+            working_dir =  exec_conf[exec_label]['RUN_DIR'],
             cores_per_worker = float(exec_conf[exec_label]['CORES_PER_WORKER']),
             worker_logdir_root = exec_conf[exec_label]['WORKER_LOGDIR_ROOT'],
             address = exec_conf[exec_label]['ADDRESS'],
