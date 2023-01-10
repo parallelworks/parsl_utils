@@ -18,10 +18,11 @@ class PWGsutil(Staging, RepresentationMixin):
         pass
 
     def can_stage_in(self, file):
-        return file.scheme == "gs"
+
+        return file.scheme == 'gs' or file.scheme == 'gs-dir'
 
     def can_stage_out(self, file):
-        return file.scheme == "gs"
+        return file.scheme == 'gs' or file.scheme == 'gs-dir'
 
     def stage_in(self, dm, executor, file, parent_fut):
 
@@ -65,7 +66,7 @@ def in_task_stage_in_wrapper(func, file, working_dir):
             os.makedirs(working_dir, exist_ok=True)
 
         logger.debug("gsutil in_task_stage_in_wrapper calling gsutil")
-        if file.isdir:
+        if file.scheme == 'gs-dir':
             cmd = "gsutil -m rsync -r gs://{permanent_filepath} {worker_filepath}"
         else:
             cmd = "gsutil -m cp -r gs://{permanent_filepath} {worker_filepath}"
@@ -97,7 +98,7 @@ def in_task_stage_out_wrapper(func, file, working_dir):
         result = func(*args, **kwargs)
         logger.debug("gsutil in_task_stage_out_wrapper returned from wrapped function, calling gsutil")
         
-        if file.isdir:
+        if file.scheme == 'gs-dir':
             cmd = "gsutil -m rsync -r {worker_filepath} gs://{permanent_filepath}"
         else:
             cmd = "gsutil -m cp -r {worker_filepath} gs://{permanent_filepath}"
