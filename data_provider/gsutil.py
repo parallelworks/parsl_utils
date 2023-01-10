@@ -71,7 +71,7 @@ def in_task_stage_in_wrapper(func, file, working_dir):
         else:
             cmd = "gsutil -m cp -r gs://{permanent_filepath} {worker_filepath}"
         
-        cmd.format(
+        cmd = cmd.format(
             permanent_filepath = file.path, 
             worker_filepath = file.local_path
         )
@@ -105,7 +105,7 @@ def in_task_stage_out_wrapper(func, file, working_dir):
         else:
             cmd = "gsutil -m cp -r {worker_filepath} gs://{permanent_filepath}"
 
-        cmd.format(
+        cmd = cmd.format(
             permanent_filepath = file.path,
             worker_filepath = file.local_path,
         )
