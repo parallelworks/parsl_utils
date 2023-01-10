@@ -80,11 +80,14 @@ def in_task_stage_in_wrapper(func, file, working_dir, hostname):
             os.makedirs(working_dir, exist_ok=True)
 
         logger.debug("rsync in_task_stage_in_wrapper calling rsync")
-        r = os.system("rsync -avzq {hostname}:{permanent_filepath} {worker_filepath}".format(hostname=hostname,
-                                                                                       permanent_filepath=file.path,
-                                                                                       worker_filepath=file.local_path))
+        cmd = "rsync -avzq {hostname}:{permanent_filepath} {worker_filepath}".format(
+            hostname=hostname,
+            permanent_filepath=file.path,
+            worker_filepath=file.local_path
+        )
+        r = os.system(cmd)
         if r != 0:
-            raise RuntimeError("rsync returned {}, a {}".format(r, type(r)))
+            raise RuntimeError("rsync command {} returned {}, a {}".format(cmd, r, type(r)))
         logger.debug("rsync in_task_stage_in_wrapper calling wrapped function")
         result = func(*args, **kwargs)
         logger.debug("rsync in_task_stage_in_wrapper returned from wrapped function")
@@ -101,18 +104,17 @@ def in_task_stage_out_wrapper(func, file, working_dir, hostname):
         logger.debug("rsync in_task_stage_out_wrapper calling wrapped function")
         result = func(*args, **kwargs)
         logger.debug("rsync in_task_stage_out_wrapper returned from wrapped function, calling rsync")
-        rsync_cmd = "rsync -avzq --rsync-path=\"mkdir -p {root_path} && rsync\" {worker_filepath} {hostname}:{permanent_filepath}"
-        r = os.system(
-            rsync_cmd.format(
-                hostname=hostname,
-                permanent_filepath=file.path,
-                worker_filepath=file.local_path,
-                root_path = os.path.dirname(file.path)
-            )
+        cmd = "rsync -avzq --rsync-path=\"mkdir -p {root_path} && rsync\" {worker_filepath} {hostname}:{permanent_filepath}".format(
+            hostname=hostname,
+            permanent_filepath=file.path,
+            worker_filepath=file.local_path,
+            root_path = os.path.dirname(file.path)
         )
 
+        r = os.system(cmd)
+
         if r != 0:
-            raise RuntimeError("rsync returned {}, a {}".format(r, type(r)))
+            raise RuntimeError("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
         logger.debug("rsync in_task_stage_out_wrapper returned from rsync")
         return result
     return wrapper
