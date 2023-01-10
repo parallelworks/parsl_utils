@@ -1,7 +1,6 @@
 import os 
 from . import parsl_wrappers
 from . import data_provider
-from . import popen
 from . import pool_api
 
 if os.path.isfile('executors.json'):
