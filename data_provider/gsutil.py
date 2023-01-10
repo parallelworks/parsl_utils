@@ -70,13 +70,15 @@ def in_task_stage_in_wrapper(func, file, working_dir):
             cmd = "gsutil -m rsync -r gs://{permanent_filepath} {worker_filepath}"
         else:
             cmd = "gsutil -m cp -r gs://{permanent_filepath} {worker_filepath}"
-
-        r = os.system(
-            cmd.format(
-                permanent_filepath = file.path,
-                worker_filepath = file.local_path
-            )
+        
+        cmd.format(
+            permanent_filepath = file.path, 
+            worker_filepath = file.local_path
         )
+        
+        logger.debug(cmd)
+        
+        r = os.system(cmd)
 
         if r != 0:
             raise RuntimeError("gsutil returned {}, a {}".format(r, type(r)))
@@ -103,13 +105,14 @@ def in_task_stage_out_wrapper(func, file, working_dir):
         else:
             cmd = "gsutil -m cp -r {worker_filepath} gs://{permanent_filepath}"
 
-        r = os.system(
-            cmd.format(
-                permanent_filepath=file.path,
-                worker_filepath=file.local_path,
-                root_path = os.path.dirname(file.path)
-            )
+        cmd.format(
+            permanent_filepath = file.path,
+            worker_filepath = file.local_path,
         )
+
+        logger.debug(cmd)
+
+        r = os.system(cmd)
 
         if r != 0:
             raise RuntimeError("gsutil returned {}, a {}".format(r, type(r)))
