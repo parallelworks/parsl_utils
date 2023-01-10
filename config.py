@@ -113,7 +113,8 @@ for exec_label, exec_conf_i in exec_conf.items():
             provider = provider,
             storage_access = [ 
                 RSyncStaging('usercontainer'), 
-                PWRSyncStaging('usercontainer')
+                PWRSyncStaging('usercontainer'),
+                PWGsutil()
             ]
         )
     )
