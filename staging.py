@@ -2,8 +2,18 @@ import os
 import subprocess
 import time
 
+from parsl.data_provider.files import File
+
+
 ssh = 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no '
 ssh_shell = 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no {host} -t \'bash -l -c \"{cmd}\"\''
+
+def PWFile(path, local_path, scheme, netloc = None):
+    f = File(scheme + '://' + path)
+    f.local_path = local_path
+    if netloc:
+        f.netloc = netloc
+    return f
 
 def _stage_input(ioval, host):
     if ioval['global_path'].startswith('pw://'):
@@ -101,4 +111,5 @@ def stage_outputs(io, host):
     print('\nSTAGING OUTPUTS:', flush = True)
     for ioval in io.values():
         _stage_output(ioval, host)
+
 
