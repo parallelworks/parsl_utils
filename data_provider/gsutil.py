@@ -67,9 +67,9 @@ def in_task_stage_in_wrapper(func, file, working_dir):
 
         logger.debug("gsutil in_task_stage_in_wrapper calling gsutil")
         if file.scheme == 'gs-dir':
-            cmd = "gsutil -m rsync -r gs://{permanent_filepath} {worker_filepath}"
+            cmd = "gsutil -m rsync -r gs:/{permanent_filepath} {worker_filepath}"
         else:
-            cmd = "gsutil -m cp -r gs://{permanent_filepath} {worker_filepath}"
+            cmd = "gsutil -m cp -r gs:/{permanent_filepath} {worker_filepath}"
         
         cmd = cmd.format(
             permanent_filepath = file.path, 
@@ -101,9 +101,9 @@ def in_task_stage_out_wrapper(func, file, working_dir):
         logger.debug("gsutil in_task_stage_out_wrapper returned from wrapped function, calling gsutil")
         
         if file.scheme == 'gs-dir':
-            cmd = "gsutil -m rsync -r {worker_filepath} gs://{permanent_filepath}"
+            cmd = "gsutil -m rsync -r {worker_filepath} gs:/{permanent_filepath}"
         else:
-            cmd = "gsutil -m cp -r {worker_filepath} gs://{permanent_filepath}"
+            cmd = "gsutil -m cp -r {worker_filepath} gs:/{permanent_filepath}"
 
         cmd = cmd.format(
             permanent_filepath = file.path,
