@@ -6,44 +6,6 @@ import signal
 import functools
 import traceback
 
-from . import staging
-
-stage_inputs = staging.stage_inputs
-stage_outputs = staging.stage_outputs
-
-# If you make it run on the remote side with Parsl App would it work with coasters too? NO, you don't know where an app runs
-
-#def stage(data, host, io_type):
-#    print(data, host, io_type)
-
-class StageOutFuture:
-    def __init__(self, future, outputs, host):
-        self.future = future
-        self.outputs = outputs
-        self.host = host
-
-    def result(self):
-        result = self.future.result()
-        stage_outputs(self.outputs, self.host)
-        return result
-
-
-
-
-def stage_app(host):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            if 'inputs_dict' in kwargs:
-                stage_inputs(kwargs['inputs_dict'], host)
-
-            fut = func(*args, **kwargs)
-
-            if 'outputs_dict' in kwargs:
-                return StageOutFuture(fut, kwargs['outputs_dict'], host)
-
-            return fut
-        return wrapper
-    return decorator
 
 def log_app(func):
     def wrapper(*args, **kwargs):
