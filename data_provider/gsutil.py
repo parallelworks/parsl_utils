@@ -81,7 +81,7 @@ def in_task_stage_in_wrapper(func, file, working_dir):
         r = os.system(cmd)
 
         if r != 0:
-            raise RuntimeError("gsutil returned {}, a {}".format(r, type(r)))
+            raise RuntimeError("gsutil command <{}> returned {}, a {}".format(cmd, r, type(r)))
 
         logger.debug("gsutil in_task_stage_in_wrapper calling wrapped function")
         result = func(*args, **kwargs)
@@ -115,7 +115,7 @@ def in_task_stage_out_wrapper(func, file, working_dir):
         r = os.system(cmd)
 
         if r != 0:
-            raise RuntimeError("gsutil returned {}, a {}".format(r, type(r)))
+            raise RuntimeError("gsutil command <{}> returned {}, a {}".format(cmd, r, type(r)))
         logger.debug("gsutil in_task_stage_out_wrapper returned from gsutil")
         return result
     return wrapper
