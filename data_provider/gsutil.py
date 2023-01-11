@@ -4,6 +4,8 @@ import os
 from parsl.utils import RepresentationMixin
 from parsl.data_provider.staging import Staging
 
+from . import utils
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,24 +28,32 @@ class PWGsutil(Staging, RepresentationMixin):
 
     def stage_in(self, dm, executor, file, parent_fut):
 
-        working_dir = dm.dfk.executors[executor].working_dir
+        file = utils.fix_local_path(file)
 
-        if working_dir:
-            file.local_path = os.path.join(working_dir, file.filename)
-        else:
+        if file.local_path is None:
             file.local_path = file.filename
-
+        elif not os.path.isabs(file.local_path):
+            working_dir = dm.dfk.executors[executor].working_dir
+            if working_dir:
+                file.local_path = os.path.join(working_dir, file.local_path)
+            else:
+                file.local_path = file.filename
+        
         return None
 
     def stage_out(self, dm, executor, file, parent_fut):
 
-        working_dir = dm.dfk.executors[executor].working_dir
+        file = utils.fix_local_path(file)
 
-        if working_dir:
-            file.local_path = os.path.join(working_dir, file.filename)
-        else:
+        if file.local_path is None:
             file.local_path = file.filename
-
+        elif not os.path.isabs(file.local_path):
+            working_dir = dm.dfk.executors[executor].working_dir
+            if working_dir:
+                file.local_path = os.path.join(working_dir, file.local_path)
+            else:
+                file.local_path = file.filename
+        
         return None
 
     def replace_task(self, dm, executor, file, f):
@@ -64,6 +74,10 @@ def in_task_stage_in_wrapper(func, file, working_dir):
         logger.debug("gsutil in_task_stage_in_wrapper start")
         if working_dir:
             os.makedirs(working_dir, exist_ok=True)
+        
+        local_path_dir = os.path.dirname(file.local_path)
+        if local_path_dir:
+            os.makedirs(local_path_dir, exist_ok=True)
 
         logger.debug("gsutil in_task_stage_in_wrapper calling gsutil")
         if file.scheme == 'gs-dir':
