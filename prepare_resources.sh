@@ -162,7 +162,7 @@ while IFS= read -r exec_conf; do
 
     # Copy workflow_apps.py if it exits
     if [ -f "workflow_apps.py" ]; then
-        scp ${ssh_options} ${LOCAL_SINGULARITY_FILE} ${HOST_USER}@${HOST_IP}:${REMOTE_SINGULARITY_FILE}
+        scp ${ssh_options} ${LOCAL_SINGULARITY_FILE} ${HOST_USER}@${HOST_IP}:${RUN_DIR}/workflow_apps.py
     fi
 
     if [[ ${CREATE_SINGULARITY_CONTAINER} == "true" ]]; then
