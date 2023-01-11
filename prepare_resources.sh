@@ -160,6 +160,16 @@ while IFS= read -r exec_conf; do
         scp ${ssh_options} ${LOCAL_SINGULARITY_FILE} ${HOST_USER}@${HOST_IP}:${REMOTE_SINGULARITY_FILE}
     fi
 
+    # Copy workflow_apps.py if it exits
+    if [ -f "workflow_apps.py" ]; then
+        scp ${ssh_options} ${LOCAL_SINGULARITY_FILE} ${HOST_USER}@${HOST_IP}:${REMOTE_SINGULARITY_FILE}
+    fi
+
+    if [[ ${CREATE_SINGULARITY_CONTAINER} == "true" ]]; then
+        REMOTE_SINGULARITY_FILE=${RUN_DIR}/$(basename ${LOCAL_SINGULARITY_FILE})
+        scp ${ssh_options} ${LOCAL_SINGULARITY_FILE} ${HOST_USER}@${HOST_IP}:${REMOTE_SINGULARITY_FILE}
+    fi
+
     # Copy parsl utils to the run directory. This is needed to be able to use custom staging providers
     if ! [[ ${STAGE_PARSL_UTILS} == "false" ]]; then
         rsync -avzq parsl_utils ${HOST_USER}@${HOST_IP}:${RUN_DIR}/
