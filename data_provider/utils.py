@@ -6,7 +6,7 @@ def fix_local_path(f):
     """
 
     if '#' in f.url:
-        local_path = url.split('#')[1]
+        local_path = f.url.split('#')[1]
         if local_path:
             f.local_path = local_path
     return f
