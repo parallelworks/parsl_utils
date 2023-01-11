@@ -38,11 +38,13 @@ class PWRSyncStaging(Staging, RepresentationMixin):
         # rsync remote name needs to include absolute path
         file.path = os.path.abspath(file.path)
 
-        working_dir = dm.dfk.executors[executor].working_dir
-
-        if working_dir:
-            file.local_path = os.path.join(working_dir, file.filename)
-        else:
+        if not os.path.isabs(file.local_path):
+            working_dir = dm.dfk.executors[executor].working_dir
+            if working_dir:
+                file.local_path = os.path.join(working_dir, file.local_path)
+            else:
+                file.local_path = file.filename
+        elif file.local_path is None:
             file.local_path = file.filename
 
         return None
@@ -51,11 +53,13 @@ class PWRSyncStaging(Staging, RepresentationMixin):
 
         file.path = os.path.abspath(file.path)
 
-        working_dir = dm.dfk.executors[executor].working_dir
-
-        if working_dir:
-            file.local_path = os.path.join(working_dir, file.filename)
-        else:
+        if not os.path.isabs(file.local_path):
+            working_dir = dm.dfk.executors[executor].working_dir
+            if working_dir:
+                file.local_path = os.path.join(working_dir, file.local_path)
+            else:
+                file.local_path = file.filename
+        elif file.local_path is None:
             file.local_path = file.filename
 
         return None
@@ -86,10 +90,9 @@ def in_task_stage_in_wrapper(func, file, working_dir, hostname):
             worker_filepath=file.local_path
         )
         r = os.system(cmd)
-        #if r != 0:
+        if r != 0:
             # raise RuntimeError("rsync command {} returned {}, a {}".format(cmd, r, type(r)))
-        print("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)), flush = True)
-        logger.debug("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
+            logger.info("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
             
         logger.debug("rsync in_task_stage_in_wrapper calling wrapped function")
         result = func(*args, **kwargs)
@@ -115,9 +118,9 @@ def in_task_stage_out_wrapper(func, file, working_dir, hostname):
         )
 
         r = os.system(cmd)
-        #if r != 0:
+        if r != 0:
             # raise RuntimeError("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
-        logger.debug("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
+            logger.info("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
             
         logger.debug("rsync in_task_stage_out_wrapper returned from rsync")
         return result
