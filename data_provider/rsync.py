@@ -39,7 +39,7 @@ class PWRSyncStaging(Staging, RepresentationMixin):
         # we need to make path an absolute path, because
         # rsync remote name needs to include absolute path
         file.path = os.path.abspath(file.path)
-        file = utils.fix_local_path(f)
+        file = utils.fix_local_path(file)
 
         if file.local_path is None:
             file.local_path = file.filename
@@ -55,7 +55,7 @@ class PWRSyncStaging(Staging, RepresentationMixin):
     def stage_out(self, dm, executor, file, parent_fut):
 
         file.path = os.path.abspath(file.path)
-        file = utils.fix_local_path(f)
+        file = utils.fix_local_path(file)
 
         if file.local_path is None:
             file.local_path = file.filename
