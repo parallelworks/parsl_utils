@@ -85,7 +85,7 @@ def in_task_stage_in_wrapper(func, file, working_dir, hostname):
             permanent_filepath=file.path,
             worker_filepath=file.local_path
         )
-        #r = os.system(cmd)
+        r = os.system(cmd)
         #if r != 0:
             # raise RuntimeError("rsync command {} returned {}, a {}".format(cmd, r, type(r)))
         logger.debug("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
