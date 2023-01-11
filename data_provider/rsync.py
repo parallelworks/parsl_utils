@@ -28,10 +28,10 @@ class PWRSyncStaging(Staging, RepresentationMixin):
         self.hostname = hostname
 
     def can_stage_in(self, file):
-        return file.scheme == "pwfile"
+        return file.scheme == "file"
 
     def can_stage_out(self, file):
-        return file.scheme == "pwfile"
+        return file.scheme == "file"
 
     def stage_in(self, dm, executor, file, parent_fut):
         # we need to make path an absolute path, because
@@ -87,7 +87,9 @@ def in_task_stage_in_wrapper(func, file, working_dir, hostname):
         )
         r = os.system(cmd)
         if r != 0:
-            raise RuntimeError("rsync command {} returned {}, a {}".format(cmd, r, type(r)))
+            # raise RuntimeError("rsync command {} returned {}, a {}".format(cmd, r, type(r)))
+            logger.info("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
+            
         logger.debug("rsync in_task_stage_in_wrapper calling wrapped function")
         result = func(*args, **kwargs)
         logger.debug("rsync in_task_stage_in_wrapper returned from wrapped function")
@@ -112,9 +114,10 @@ def in_task_stage_out_wrapper(func, file, working_dir, hostname):
         )
 
         r = os.system(cmd)
-
         if r != 0:
-            raise RuntimeError("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
+            # raise RuntimeError("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
+            logger.info("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
+            
         logger.debug("rsync in_task_stage_out_wrapper returned from rsync")
         return result
     return wrapper
