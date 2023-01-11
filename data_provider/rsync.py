@@ -85,10 +85,10 @@ def in_task_stage_in_wrapper(func, file, working_dir, hostname):
             permanent_filepath=file.path,
             worker_filepath=file.local_path
         )
-        r = os.system(cmd)
-        if r != 0:
+        #r = os.system(cmd)
+        #if r != 0:
             # raise RuntimeError("rsync command {} returned {}, a {}".format(cmd, r, type(r)))
-            logger.info("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
+        logger.debug("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
             
         logger.debug("rsync in_task_stage_in_wrapper calling wrapped function")
         result = func(*args, **kwargs)
@@ -114,9 +114,9 @@ def in_task_stage_out_wrapper(func, file, working_dir, hostname):
         )
 
         r = os.system(cmd)
-        if r != 0:
+        #if r != 0:
             # raise RuntimeError("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
-            logger.info("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
+        logger.debug("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
             
         logger.debug("rsync in_task_stage_out_wrapper returned from rsync")
         return result
