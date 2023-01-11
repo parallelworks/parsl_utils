@@ -2,6 +2,7 @@ from parsl.data_provider.files import File
 
 from . import rsync
 from . import gsutil
+from . import files
 
 
 def PWFile(path, local_path, scheme, netloc):
