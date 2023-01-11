@@ -86,6 +86,10 @@ def in_task_stage_in_wrapper(func, file, working_dir, hostname):
         logger.debug("rsync in_task_stage_in_wrapper start")
         if working_dir:
             os.makedirs(working_dir, exist_ok=True)
+        
+        local_path_dir = os.path.dirname(file.local_path)
+        if local_path_dir:
+            os.makedirs(local_path_dir, exist_ok=True)
 
         logger.debug("rsync in_task_stage_in_wrapper calling rsync")
         cmd = "rsync -avzq {hostname}:{permanent_filepath} {worker_filepath}".format(
