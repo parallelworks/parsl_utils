@@ -161,7 +161,7 @@ while IFS= read -r exec_conf; do
     fi
 
     # Copy parsl utils to the run directory. This is needed to be able to use custom staging providers
-    if [[ ${STAGE_PARSL_UTILS} == "true" ]]; then
+    if ! [[ ${STAGE_PARSL_UTILS} == "false" ]]; then
         rsync -avzq parsl_utils ${HOST_USER}@${HOST_IP}:${RUN_DIR}/
     fi
 
