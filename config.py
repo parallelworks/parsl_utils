@@ -4,7 +4,7 @@ from parsl.providers import LocalProvider, SlurmProvider, PBSProProvider
 from parsl.executors import HighThroughputExecutor
 #from parsl.monitoring.monitoring import MonitoringHub
 from parsl.addresses import address_by_hostname
-from parsl.data_provider.rsync import RSyncStaging
+#from parsl.data_provider.rsync import RSyncStaging
 
 import os
 import json
@@ -113,7 +113,6 @@ for exec_label, exec_conf_i in exec_conf.items():
             address = exec_conf[exec_label]['ADDRESS'],
             provider = provider,
             storage_access = [ 
-                RSyncStaging('usercontainer'), 
                 PWRSyncStaging('usercontainer'),
                 PWGsutil()
             ]
