@@ -119,9 +119,25 @@ for exec_label, exec_conf_i in exec_conf.items():
         )
     )
     
-config = Config(
-    executors = executors
-)
+
+if len(executors) > 1:
+    config = Config(
+        executors = executors
+    )
+else:
+    from parsl.monitoring.monitoring import MonitoringHub
+    executor_address = list(exec_conf.values())[0]['ADDRESS']
+    config = Config(
+        executors = executors,
+        monitoring = MonitoringHub(
+            hub_address = executor_address,
+            monitoring_debug = False,
+            workflow_name = str(job_number),
+            logging_endpoint = 'sqlite:////pw/.monitoring.db',
+            resource_monitoring_enabled = False,
+        )
+    )
+
 # ,
 #    monitoring = MonitoringHub(
 #       hub_address = address_by_hostname(),
