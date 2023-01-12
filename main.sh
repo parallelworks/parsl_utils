@@ -55,6 +55,11 @@ conda activate ${CONDA_ENV}
 ############################################
 bash ${pudir}/prepare_resources.sh ${job_number} &> logs/prepare_resources.out
 
+###############################
+# CREATE MONITORING HTML FILE #
+###############################
+sed "s/__JOBNUM__/${job_number}/g" ${pudir}/service.html.template > service.html
+
 ####################
 # SUBMIT PARSL JOB #
 ####################
