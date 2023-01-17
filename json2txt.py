@@ -22,6 +22,9 @@ def json2txt(fjson):
         # Configuration ready to be exported to bash
         bash_export = ['LABEL=' + exec_label]
         for eck, ecv in exec_conf.items():
+            if type(ecv) == dict:
+                ecv = json.dumps(ecv).replace(' ','')
+
             bash_export.append(eck + '=' + str(ecv))
         print(' '.join(bash_export))
 
