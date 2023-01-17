@@ -17,6 +17,11 @@ if [ -f "executors.override.json" ];then
     cp executors.override.json executors.json
 fi
 
+# check if executors file exists
+if [ ! -f executors.json ]; then
+    echo "ERROR: File executors.json is missing; workflow does not know where to run!"
+fi
+
 # Use a job_number to:
 # 1. Track / cancel job
 # 2. Stage temporary files
