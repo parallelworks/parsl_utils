@@ -62,14 +62,14 @@ for exec_label, exec_conf_i in exec_conf.items():
     # Define provider
     if 'PBSProProvider' in exec_conf_i:
         provider = PBSProProvider(
-            **exec_conf_i['PBSProProvider'],
+            **json.loads(exec_conf_i['PBSProProvider']),
             worker_init = worker_init,
             channel = channel
 
         )
     elif 'SlurmProvider' in exec_conf_i:
         provider = SlurmProvider(
-            **exec_conf_i['SlurmProvider'],
+            **json.loads(exec_conf_i['SlurmProvider']),
             worker_init = worker_init,
             channel = channel
         )
