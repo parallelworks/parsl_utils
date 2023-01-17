@@ -20,6 +20,29 @@ fi
 # check if executors file exists
 if [ ! -f executors.json ]; then
     echo "ERROR: File executors.json is missing; workflow does not know where to run!"
+    echo "This missing file should have at least the following information:"
+    echo "{"
+    echo " \"myexecutor_1\": {"
+    echo "  \"POOL\": \"pool_name\","
+    echo "  \"HOST_USER\": \"user_name\","
+    echo "  \"HOST_IP\": \"ip_address\","
+    echo "  \"RUN_DIR\": \"/path/to/rundir\","
+    echo "  \"NODES\": integer_number_nodes,"
+    echo "  \"PARTITION\": \"SLURM_partition\","
+    echo "  \"NTASKS_PER_NODE\": integer_tasks_per_node,"
+    echo "  \"WALLTIME\": \"01:00:00\","
+    echo "  \"CONDA_ENV\": \"conda_environment_name\","
+    echo "  \"CONDA_DIR\": \"/path/to/condadir\","
+    echo "  \"WORKER_LOGDIR_ROOT\": \"/shared/centos/\","
+    echo "  \"SSH_CHANNEL_SCRIPT_DIR\": \"/shared/centos/\","
+    echo "  \"CORES_PER_WORKER\": integer_or_fractional_number_cores,"
+    echo "  \"INSTALL_CONDA\": \"<true|false>\","
+    echo "  \"LOCAL_CONDA_YAML\": \"./requirements/conda_env_remote.yaml\""
+    echo " },"
+    echo " \"myexecutor_2\": {...},"
+    echo " ..."
+    echo "}"
+    exit 1
 fi
 
 # Use a job_number to:
