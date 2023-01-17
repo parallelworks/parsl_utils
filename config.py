@@ -35,11 +35,16 @@ for exec_label, exec_conf_i in exec_conf.items():
         base_dir = '/tmp'
         exec_conf[exec_label]['RUN_DIR'] = os.path.join(base_dir, str(job_number))
                 
+    if 'SSH_CHANNEL_SCRIPT_DIR' not in exec_conf[exec_label]:
+        script_dir = os.path.join(exec_conf[exec_label]['RUN_DIR'], 'ssh_channel_script_dir')
+    else:
+        script_dir = exec_conf[exec_label]['SSH_CHANNEL_SCRIPT_DIR']
+    
     channel = SSHChannel(
         hostname = exec_conf[exec_label]['HOST_IP'],
         username = exec_conf[exec_label]['HOST_USER'],
         # Full path to a script dir where generated scripts could be sent to
-        script_dir = exec_conf[exec_label]['SSH_CHANNEL_SCRIPT_DIR'],
+        script_dir = script_dir,
             key_filename = '/home/{PW_USER}/.ssh/pw_id_rsa'.format(
             PW_USER = os.environ['PW_USER']
         )
@@ -99,6 +104,11 @@ for exec_label, exec_conf_i in exec_conf.items():
             channel = channel
         )
     
+    if 'WORKER_LOGDIR_ROOT' not in exec_conf[exec_label]:
+        worker_logdir_root = os.path.join(exec_conf[exec_label]['RUN_DIR'], 'worker_logdir_root')
+    else:
+        worker_logdir_root =  exec_conf[exec_label]['WORKER_LOGDIR_ROOT']
+    
     executors.append(
         HighThroughputExecutor(
             worker_ports=((
@@ -109,7 +119,7 @@ for exec_label, exec_conf_i in exec_conf.items():
             worker_debug = True,             # Default False for shorter logs
             working_dir =  exec_conf[exec_label]['RUN_DIR'],
             cores_per_worker = float(exec_conf[exec_label]['CORES_PER_WORKER']),
-            worker_logdir_root = exec_conf[exec_label]['WORKER_LOGDIR_ROOT'],
+            worker_logdir_root = worker_logdir_root,
             address = exec_conf[exec_label]['ADDRESS'],
             provider = provider,
             storage_access = [ 

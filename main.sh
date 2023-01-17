@@ -33,8 +33,6 @@ if [ ! -f executors.json ]; then
     echo "  \"WALLTIME\": \"01:00:00\","
     echo "  \"CONDA_ENV\": \"conda_environment_name\","
     echo "  \"CONDA_DIR\": \"/path/to/condadir\","
-    echo "  \"WORKER_LOGDIR_ROOT\": \"/shared/centos/\","
-    echo "  \"SSH_CHANNEL_SCRIPT_DIR\": \"/shared/centos/\","
     echo "  \"CORES_PER_WORKER\": integer_or_fractional_number_cores,"
     echo "  \"INSTALL_CONDA\": \"<true|false>\","
     echo "  \"LOCAL_CONDA_YAML\": \"./requirements/conda_env_remote.yaml\""
