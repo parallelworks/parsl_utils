@@ -28,21 +28,21 @@ for label, executor in exec_conf.items():
 # Define HighThroughputExecutors
 executors = []
 for exec_label, exec_conf_i in exec_conf.items():
-    # Add sandbox directory
-    if 'RUN_DIR' in exec_conf_i:
-        exec_conf[exec_label]['RUN_DIR'] = exec_conf_i['RUN_DIR']
-    else:
-        base_dir = '/tmp'
-        exec_conf[exec_label]['RUN_DIR'] = os.path.join(base_dir, str(job_number))
-                
-    if 'SSH_CHANNEL_SCRIPT_DIR' not in exec_conf[exec_label]:
-        script_dir = os.path.join(exec_conf[exec_label]['RUN_DIR'], 'ssh_channel_script_dir')
-    else:
-        script_dir = exec_conf[exec_label]['SSH_CHANNEL_SCRIPT_DIR']
     
+    # Set default values:
+    if 'SSH_CHANNEL_SCRIPT_DIR' not in exec_conf_i:
+        script_dir = os.path.join(exec_conf_i['RUN_DIR'], 'ssh_channel_script_dir')
+    else:
+        script_dir = exec_conf_i['SSH_CHANNEL_SCRIPT_DIR']
+    
+    if 'WORKER_LOGDIR_ROOT' not in exec_conf_i:
+        worker_logdir_root = os.path.join(exec_conf_i['RUN_DIR'], 'worker_logdir_root')
+    else:
+        worker_logdir_root =  exec_conf_i['WORKER_LOGDIR_ROOT']
+
     channel = SSHChannel(
-        hostname = exec_conf[exec_label]['HOST_IP'],
-        username = exec_conf[exec_label]['HOST_USER'],
+        hostname = exec_conf_i['HOST_IP'],
+        username = exec_conf_i['HOST_USER'],
         # Full path to a script dir where generated scripts could be sent to
         script_dir = script_dir,
             key_filename = '/home/{PW_USER}/.ssh/pw_id_rsa'.format(
@@ -53,74 +53,51 @@ for exec_label, exec_conf_i in exec_conf.items():
     # Define worker init:
     # - export PYTHONPATH={run_dir} is needed to use custom staging providers
     worker_init = 'export PYTHONPATH={run_dir}; bash {workdir}/pw/remote.sh; source {conda_sh}; conda activate {conda_env}; cd {run_dir}'.format(
-        workdir = exec_conf[exec_label]['WORKDIR'],
-        conda_sh = os.path.join(exec_conf[exec_label]['CONDA_DIR'], 'etc/profile.d/conda.sh'),
-        conda_env = exec_conf[exec_label]['CONDA_ENV'],
-        run_dir = exec_conf[exec_label]['RUN_DIR']
+        workdir = exec_conf_i['WORKDIR'],
+        conda_sh = os.path.join(exec_conf_i['CONDA_DIR'], 'etc/profile.d/conda.sh'),
+        conda_env = exec_conf_i['CONDA_ENV'],
+        run_dir = exec_conf_i['RUN_DIR']
     )
 
-    if "PROVIDER_TYPE" in exec_conf_i:
-        if exec_conf[exec_label]['PROVIDER_TYPE'] == "LOCAL":
-            # Need to overwrite the default worker_init since we don't want to run remote.sh in this case
-            worker_init = 'export PYTHONPATH={run_dir}; source {conda_sh}; conda activate {conda_env}; cd {run_dir}'.format(
-                conda_sh = os.path.join(exec_conf[exec_label]['CONDA_DIR'], 'etc/profile.d/conda.sh'),
-                conda_env = exec_conf[exec_label]['CONDA_ENV'],
-                run_dir = exec_conf[exec_label]['RUN_DIR']
-            )
-
     # Define provider
-    # Default provider
-    provider = None
-    if "PROVIDER_TYPE" in exec_conf_i:
-        if exec_conf[exec_label]['PROVIDER_TYPE'] == "PBS":
-            provider = PBSProProvider(
-                queue = exec_conf[exec_label]['QUEUE'],
-                scheduler_options = '#PBS -q {QUEUE}'.format(
-                    QUEUE = exec_conf[exec_label]['QUEUE']
-                ),
-                nodes_per_block = int(exec_conf[exec_label]['NODES_PER_BLOCK']),
-                cpus_per_node = exec_conf[exec_label]['CPUS_PER_NODE'],
-                min_blocks = int(exec_conf[exec_label]['MIN_BLOCKS']),
-                max_blocks = int(exec_conf[exec_label]['MAX_BLOCKS']),
-                walltime = exec_conf[exec_label]['WALLTIME'],
-                worker_init = worker_init,
-                channel = channel
-            )
-        elif exec_conf[exec_label]['PROVIDER_TYPE'] == "LOCAL":
-            provider = LocalProvider(
-                worker_init = worker_init,
-                channel = channel
-            )
+    if 'PBSProProvider' in exec_conf_i:
+        provider = PBSProProvider(
+            **exec_conf_i['PBSProProvider'],
+            worker_init = worker_init,
+            channel = channel
 
-    if provider == None:
+        )
+    elif 'SlurmProvider' in exec_conf_i:
         provider = SlurmProvider(
-            partition = exec_conf[exec_label]['PARTITION'],
-            nodes_per_block = int(exec_conf[exec_label]['NODES_PER_BLOCK']),
-            cores_per_node = int(exec_conf[exec_label]['NTASKS_PER_NODE']),
-            min_blocks = int(exec_conf[exec_label]['MIN_BLOCKS']),
-            max_blocks = int(exec_conf[exec_label]['MAX_BLOCKS']),
-            walltime = exec_conf[exec_label]['WALLTIME'],
+            **exec_conf_i['SlurmProvider'],
+            worker_init = worker_init,
+            channel = channel
+        )
+    else:
+        # Need to overwrite the default worker_init since we don't want to run remote.sh in this case
+        worker_init = 'export PYTHONPATH={run_dir}; source {conda_sh}; conda activate {conda_env}; cd {run_dir}'.format(
+            conda_sh = os.path.join(exec_conf_i['CONDA_DIR'], 'etc/profile.d/conda.sh'),
+            conda_env = exec_conf_i['CONDA_ENV'],
+            run_dir = exec_conf_i['RUN_DIR']
+        )
+
+        provider = LocalProvider(
             worker_init = worker_init,
             channel = channel
         )
     
-    if 'WORKER_LOGDIR_ROOT' not in exec_conf[exec_label]:
-        worker_logdir_root = os.path.join(exec_conf[exec_label]['RUN_DIR'], 'worker_logdir_root')
-    else:
-        worker_logdir_root =  exec_conf[exec_label]['WORKER_LOGDIR_ROOT']
-    
     executors.append(
         HighThroughputExecutor(
             worker_ports=((
-                int(exec_conf[exec_label]['WORKER_PORT_1']), 
-                int(exec_conf[exec_label]['WORKER_PORT_2'])
+                int(exec_conf_i['WORKER_PORT_1']), 
+                int(exec_conf_i['WORKER_PORT_2'])
             )),
             label = exec_label,
             worker_debug = True,             # Default False for shorter logs
-            working_dir =  exec_conf[exec_label]['RUN_DIR'],
-            cores_per_worker = float(exec_conf[exec_label]['CORES_PER_WORKER']),
+            working_dir =  exec_conf_i['RUN_DIR'],
+            cores_per_worker = float(exec_conf_i['CORES_PER_WORKER']),
             worker_logdir_root = worker_logdir_root,
-            address = exec_conf[exec_label]['ADDRESS'],
+            address = exec_conf_i['ADDRESS'],
             provider = provider,
             storage_access = [ 
                 PWRSyncStaging('usercontainer'),
