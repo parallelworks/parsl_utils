@@ -32,5 +32,6 @@ f_install_miniconda() {
     }
 
     # Make sure conda environment meets requirements:
-    conda env update -n ${CONDA_ENV} -f ${CONDA_YAML} #--prune
+    conda env update -n ${CONDA_ENV} -q -f ${CONDA_YAML} #--prune
 }
+
