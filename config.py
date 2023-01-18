@@ -59,6 +59,14 @@ for exec_label, exec_conf_i in exec_conf.items():
         run_dir = exec_conf_i['RUN_DIR']
     )
 
+    # Data provider:
+    # Commands run in worker nodes
+    #    -> rsync commands needs to use the internal IP of the controller node as jump host to reach usercontainer 
+    storage_access = [ 
+        PWRSyncStaging('usercontainer', jumphost = exec_conf_i['ADDRESS']),
+        PWGsutil()
+    ]
+
     # Define provider
     if 'PBSProProvider' in exec_conf_i:
         provider = PBSProProvider(
@@ -67,6 +75,7 @@ for exec_label, exec_conf_i in exec_conf.items():
             channel = channel
 
         )
+
     elif 'SlurmProvider' in exec_conf_i:
         provider = SlurmProvider(
             **json.loads(exec_conf_i['SlurmProvider']),
@@ -80,6 +89,12 @@ for exec_label, exec_conf_i in exec_conf.items():
             conda_env = exec_conf_i['CONDA_ENV'],
             run_dir = exec_conf_i['RUN_DIR']
         )
+
+        # jumphost is not needed when using the local provider
+        storage_access = [ 
+            PWRSyncStaging('usercontainer', jumphost = None),
+            PWGsutil()
+        ]
 
         provider = LocalProvider(
             worker_init = worker_init,
@@ -99,10 +114,7 @@ for exec_label, exec_conf_i in exec_conf.items():
             worker_logdir_root = worker_logdir_root,
             address = exec_conf_i['ADDRESS'],
             provider = provider,
-            storage_access = [ 
-                PWRSyncStaging('usercontainer'),
-                PWGsutil()
-            ]
+            storage_access = storage_access
         )
     )
     
