@@ -52,11 +52,12 @@ for exec_label, exec_conf_i in exec_conf.items():
 
     # Define worker init:
     # - export PYTHONPATH={run_dir} is needed to use custom staging providers
-    worker_init = 'export PYTHONPATH={run_dir}; bash {workdir}/pw/remote.sh; source {conda_sh}; conda activate {conda_env}; cd {run_dir}'.format(
+    worker_init = 'export PYTHONPATH={run_dir}; bash {workdir}/pw/remote.sh; source {conda_sh}; conda activate {conda_env}; cd {run_dir}; {clean_cmd}'.format(
         workdir = exec_conf_i['WORKDIR'],
         conda_sh = os.path.join(exec_conf_i['CONDA_DIR'], 'etc/profile.d/conda.sh'),
         conda_env = exec_conf_i['CONDA_ENV'],
-        run_dir = exec_conf_i['RUN_DIR']
+        run_dir = exec_conf_i['RUN_DIR'],
+        clean_cmd = "ps -x | grep worker.pl | grep -v grep | awk '{print $1}'"
     )
 
     # Data provider:
@@ -100,6 +101,12 @@ for exec_label, exec_conf_i in exec_conf.items():
             worker_init = worker_init,
             channel = channel
         )
+
+    if 'cores_per_worker' in exec_conf_i:
+        cores_per_worker = float(exec_conf_i['cores_per_worker'])
+    else:
+        cores_per_worker = 1.0
+
     
     executors.append(
         HighThroughputExecutor(
@@ -110,7 +117,7 @@ for exec_label, exec_conf_i in exec_conf.items():
             label = exec_label,
             worker_debug = True,             # Default False for shorter logs
             working_dir =  exec_conf_i['RUN_DIR'],
-            cores_per_worker = float(exec_conf_i['CORES_PER_WORKER']),
+            cores_per_worker = cores_per_worker,
             worker_logdir_root = worker_logdir_root,
             address = exec_conf_i['ADDRESS'],
             provider = provider,
