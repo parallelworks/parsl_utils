@@ -133,6 +133,7 @@ echo >>  exec_conf_completed.export
 
 # TODO: Consider using CSSH or PSSH here?
 while IFS= read -r exec_conf; do
+    echo DEBUG ${exec_conf}
     if [ -z "$exec_conf" ]; then
         continue
     fi
@@ -145,34 +146,22 @@ while IFS= read -r exec_conf; do
     # This is needed for SSHChannel in Parsl
     ssh-keygen -f "/home/${PW_USER}/.ssh/known_hosts" -R ${HOST_IP}
 
-    # Make sure run directory exists
-    ssh ${ssh_options} ${HOST_USER}@${HOST_IP} mkdir -p ${RUN_DIR}
-
-    # Copy conda environment definition
+    # Expand paths
     if [[ ${INSTALL_CONDA} == "true" ]]; then
-        REMOTE_CONDA_YAML=${RUN_DIR}/$(basename ${LOCAL_CONDA_YAML})
-        scp ${ssh_options} ${LOCAL_CONDA_YAML} ${HOST_USER}@${HOST_IP}:${REMOTE_CONDA_YAML}
+        LOCAL_CONDA_YAML=$(realpath ${LOCAL_CONDA_YAML})
     fi
-
-    # Copy singularity container definition
     if [[ ${CREATE_SINGULARITY_CONTAINER} == "true" ]]; then
-        REMOTE_SINGULARITY_FILE=${RUN_DIR}/$(basename ${LOCAL_SINGULARITY_FILE})
-        scp ${ssh_options} ${LOCAL_SINGULARITY_FILE} ${HOST_USER}@${HOST_IP}:${REMOTE_SINGULARITY_FILE}
+        LOCAL_SINGULARITY_FILE=$(realpath ${LOCAL_SINGULARITY_FILE})
     fi
 
     # Copy workflow_apps.py if it exits
     if [ -f "workflow_apps.py" ]; then
-        scp ${ssh_options} workflow_apps.py ${HOST_USER}@${HOST_IP}:${RUN_DIR}/workflow_apps.py
-    fi
-
-    if [[ ${CREATE_SINGULARITY_CONTAINER} == "true" ]]; then
-        REMOTE_SINGULARITY_FILE=${RUN_DIR}/$(basename ${LOCAL_SINGULARITY_FILE})
-        scp ${ssh_options} ${LOCAL_SINGULARITY_FILE} ${HOST_USER}@${HOST_IP}:${REMOTE_SINGULARITY_FILE}
+        WORKFLOW_APPS_PY=$(realpath workflow_apps.py)
     fi
 
     # Copy parsl utils to the run directory. This is needed to be able to use custom staging providers
     if ! [[ ${STAGE_PARSL_UTILS} == "false" ]]; then
-        rsync -avzq parsl_utils ${HOST_USER}@${HOST_IP}:${RUN_DIR}/
+        PARSL_UTILS_DIR=$(realpath ${pudir})
     fi
 
     # Create bootstrap script
@@ -181,17 +170,20 @@ while IFS= read -r exec_conf; do
         -e "s|__INSTALL_CONDA__|${INSTALL_CONDA}|g" \
         -e "s|__CONDA_DIR__|${CONDA_DIR}|g" \
         -e "s|__CONDA_ENV__|${CONDA_ENV}|g" \
-        -e "s|__REMOTE_CONDA_YAML__|${REMOTE_CONDA_YAML}|g" \
+        -e "s|__LOCAL_CONDA_YAML__|${LOCAL_CONDA_YAML}|g" \
         -e "s|__CREATE_SINGULARITY_CONTAINER__|${CREATE_SINGULARITY_CONTAINER}|g" \
         -e "s|__SINGULARITY_CONTAINER_PATH__|${SINGULARITY_CONTAINER_PATH}|g" \
-        -e "s|__REMOTE_SINGULARITY_FILE__|${REMOTE_SINGULARITY_FILE}|g" \
+        -e "s|__LOCAL_SINGULARITY_FILE__|${LOCAL_SINGULARITY_FILE}|g" \
         -e "s|__WORKER_PORT_1__|${WORKER_PORT_1}|g" \
         -e "s|__WORKER_PORT_2__|${WORKER_PORT_2}|g" \
+        -e "s|__RUN_DIR__|${RUN_DIR}|g" \
+        -e "s|__PARSL_UTILS_DIR__|${PARSL_UTILS_DIR}|g" \
+        -e "s|__WORKFLOW_APPS_PY__|${WORKFLOW_APPS_PY}|g" \
         ${pudir}/prepare_remote_resource.sh > ${LABEL}/prepare_remote_resource.sh
 
     # Prepare remote resource:
     ssh ${ssh_options} ${HOST_USER}@${HOST_IP} 'bash -s' < ${LABEL}/prepare_remote_resource.sh &> ${LABEL}/prepare_remote_resource.out
 
-    unset INSTALL_CONDA REMOTE_CONDA_YAML CREATE_SINGULARITY_CONTAINER REMOTE_SINGULARITY_FILE
+    unset INSTALL_CONDA LOCAL_CONDA_YAML CREATE_SINGULARITY_CONTAINER LOCAL_SINGULARITY_FILE PARSL_UTILS_DIR WORKFLOW_APPS_PY
 
 done < exec_conf_completed.export
