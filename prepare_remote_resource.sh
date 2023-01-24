@@ -37,10 +37,10 @@ fi
 
 # COPY REQUIRED FILES FROM PW
 if ! [ -z "${PARSL_UTILS_DIR}" ]; then
-    rsync -avzq ${USER_CONTAINER_HOST}:${PARSL_UTILS_DIR} ${RUN_DIR}/parsl_utils
+    rsync -avzq ${USER_CONTAINER_HOST}:${PARSL_UTILS_DIR} ${RUN_DIR}/
 fi
 if ! [ -z "${WORKFLOW_APPS_PY}" ]; then
-    rsync -avzq ${USER_CONTAINER_HOST}:${WORKFLOW_APPS_PY} ${RUN_DIR}/workflow_apps.py
+    scp ${USER_CONTAINER_HOST}:${WORKFLOW_APPS_PY} ${RUN_DIR}/workflow_apps.py
 fi
 
 f_install_miniconda() {
@@ -78,7 +78,7 @@ fi
 if [[ ${CREATE_SINGULARITY_CONTAINER} == "true" ]]; then
     if ! [ -f "${SINGULARITY_CONTAINER_PATH}" ]; then
         mkdir -p $(dirname ${SINGULARITY_CONTAINER_PATH})
-        SINGULARITY_FILE=${RUN_DIR}/$(basename ${PW_SINGULARITY_FILE})
+        SINGULARITY_FILE=${RUN_DIR}/$(basename ${PWDA_YAML})
         scp usercontainer:${PW_SINGULARITY_FILE} ${SINGULARITY_FILE}
         sudo singularity build ${SINGULARITY_CONTAINER_PATH} ${SINGULARITY_FILE}
     fi
