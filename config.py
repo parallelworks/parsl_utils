@@ -15,7 +15,7 @@ from parsl_utils.data_provider.gsutil import PWGsutil
 
 
 # Need to name the job to be able to remove it with clean_resources.sh!
-job_number = os.getcwd().replace('/pw/jobs/', '')
+job_number = os.getcwd().split('/')[-1]
 
 with open('executors.json', 'r') as f:
     exec_conf = json.load(f)
