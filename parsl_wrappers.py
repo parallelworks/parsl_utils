@@ -14,13 +14,13 @@ def log_app(func):
             print("\nARGS:\n{}".format(" ".join(args_str)), flush = True)
 
         if 'inputs' in kwargs:
-            print('\nINPUTS:\n' + '\n'.join([v.path for v in kwargs['inputs']]), flush = True)
+            print('\nINPUTS:\n' + '\n'.join([str(v) for v in kwargs['inputs']]), flush = True)
 
         if 'inputs_dict' in kwargs:
             print('\nINPUTS DICT: \n' + json.dumps(kwargs['inputs_dict']), flush = True)
 
         if 'outputs' in kwargs:
-            print('\nOUTPUTS:\n' + '\n'.join([v.path for v in kwargs['outputs']]), flush = True)
+            print('\nOUTPUTS:\n' + '\n'.join([str(v) for v in kwargs['outputs']]), flush = True)
 
         if 'outputs_dict' in kwargs:
             print('\nOUTPUTS DICT: \n' + json.dumps(kwargs['outputs_dict']), flush = True)
