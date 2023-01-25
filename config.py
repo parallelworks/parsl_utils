@@ -14,6 +14,19 @@ from parsl_utils.data_provider.rsync import PWRSyncStaging
 from parsl_utils.data_provider.gsutil import PWGsutil
 
 
+def read_args():
+    parser=argparse.ArgumentParser()
+    parsed, unknown = parser.parse_known_args()
+    for arg in unknown:
+        if arg.startswith(("-", "--")):
+            parser.add_argument(arg)
+    pwargs=vars(parser.parse_args())
+    print(pwargs)
+    return pwargs
+
+
+pwargs = read_args()
+
 # Need to name the job to be able to remove it with clean_resources.sh!
 job_number = os.getcwd().split('/')[-1]
 
