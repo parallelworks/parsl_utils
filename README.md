@@ -1,7 +1,7 @@
 # Parsl Utils
 This repository contains wrapper scripts to run Parsl workflows in cluster pools on the PW platform. Its goal is to enable the user to focus on the Parsl code by taking care of all the integration aspects such as creating SSH tunnels or installing conda packages. 
 
-The best way to use this repository is to look at the [parallelworks/simple_parsl_demo](https://github.com/parallelworks/simple_parsl_demo) example. 
+The best way to use this repository is to look at the [parallelworks/simple_parsl_demo](https://github.com/parallelworks/simple_parsl_demo) example. Below is a schematic for how the `parsl_utils` are integrated into a PW workflow. ![.](images/parsl_utils_flowchart.png)
 
 ## 1. Workflow Script
 The Parsl workflow is defined in the `main.py` script.
