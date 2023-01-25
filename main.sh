@@ -93,6 +93,7 @@ sed "s/__JOBNUM__/${job_number}/g" ${pudir}/service.html.template > service.html
 ####################
 # SUBMIT PARSL JOB #
 ####################
+wfargs=$(echo ${wfargs} | sed "s|__USER__|${PW_USER}|g")
 echo; echo; echo
 echo "RUNNING PARSL JOB"
 echo "python -u main.py ${wfargs}"
