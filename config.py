@@ -8,6 +8,7 @@ from parsl.addresses import address_by_hostname
 
 import os
 import json
+import argparse
 
 import parsl_utils
 from parsl_utils.data_provider.rsync import PWRSyncStaging
