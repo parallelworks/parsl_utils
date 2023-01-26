@@ -61,7 +61,8 @@ for exec_label, exec_conf_i in exec_conf.items():
         script_dir = script_dir,
             key_filename = '/home/{PW_USER}/.ssh/pw_id_rsa'.format(
             PW_USER = os.environ['PW_USER']
-        )
+        ),
+        gssapi_auth = True
     )
 
     # Define worker init:
