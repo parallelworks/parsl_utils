@@ -9,6 +9,7 @@ from parsl.addresses import address_by_hostname
 import os
 import json
 import argparse
+import shutil
 
 import parsl_utils
 from parsl_utils.data_provider.rsync import PWRSyncStaging
@@ -54,6 +55,14 @@ for exec_label, exec_conf_i in exec_conf.items():
     else:
         worker_logdir_root =  exec_conf_i['WORKER_LOGDIR_ROOT']
 
+    # To support kerberos:
+    import shutil
+    ssh_path = shutil.which('ssh')
+    if 'kerberos' in ssh_path.split('/'):
+        gssapi_auth = True
+    else:
+        gssapi_auth = False
+
     channel = SSHChannel(
         hostname = exec_conf_i['HOST_IP'],
         username = exec_conf_i['HOST_USER'],
@@ -62,7 +71,7 @@ for exec_label, exec_conf_i in exec_conf.items():
             key_filename = '/home/{PW_USER}/.ssh/pw_id_rsa'.format(
             PW_USER = os.environ['PW_USER']
         ),
-        gssapi_auth = True
+        gssapi_auth = gssapi_auth
     )
 
     # Define worker init:
