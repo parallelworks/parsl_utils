@@ -6,7 +6,7 @@ from . import gsutil
 
 
 def PWFile(url, local_path):
-    if os.path.isabs(url):
+    if os.path.isabs(url) or '://' in url:
         f = File(url + '#' + local_path)
     else:
         f = File(
