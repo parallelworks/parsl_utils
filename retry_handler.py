@@ -29,8 +29,12 @@ def fix_func_name(func_name: str, task_kwargs: dict) -> str:
 
 def retry_handler(exception, task_record) -> int:
     func_name = fix_func_name(task_record['func_name'], task_record['kwargs'])
-    #logger.info('Retrying task {task_record}'.format(json.dumps(task_record, indent=4)))
-    print(task_record)
+    logger.info('Retrying failed task {task_record}'.format(json.dumps(
+        task_record,
+        default = str, 
+        indent = 4,
+        sort_keys = True
+    )))
     # If no retry parameters are defined --> Retry task with the same parameters
     if 'retry_parameters' not in task_record['kwargs']:
         return 1
@@ -40,7 +44,7 @@ def retry_handler(exception, task_record) -> int:
         return 1
 
     if type(task_record['kwargs']['retry_parameters']) != list:
-        print('ERROR: parameter retry_parameters was expected to be list and is type={rhctype}'.format(
+        logger.error('Parameter retry_parameters was expected to be list and is type={rhctype}'.format(
             rhctype = str(type(task_record['kwargs']['retry_parameters']))
         ), flush = True)
         return 99999
@@ -57,5 +61,12 @@ def retry_handler(exception, task_record) -> int:
     if 'kwargs' in task_record['kwargs']['retry_parameters'][retry_index]:
         for aname,aval in task_record['kwargs']['retry_parameters'][retry_index]['kwargs'].items():
             task_record['kwargs'][aname] = aval
+
+    logger.info('Updated task record {task_record}'.format(json.dumps(
+        task_record,
+        default = str, 
+        indent = 4,
+        sort_keys = True
+    )))
                 
     return 1
