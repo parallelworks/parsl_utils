@@ -29,12 +29,14 @@ def fix_func_name(func_name: str, task_kwargs: dict) -> str:
 
 def retry_handler(exception, task_record) -> int:
     func_name = fix_func_name(task_record['func_name'], task_record['kwargs'])
-    logger.info('Retrying failed task {task_record}'.format(json.dumps(
-        task_record,
-        default = str, 
-        indent = 4,
-        sort_keys = True
-    )))
+    logger.info('Retrying failed task {task_record}'.format(
+        task_record = json.dumps(
+            task_record,
+            default = str, 
+            indent = 4,
+            sort_keys = True
+        )
+    ))
     # If no retry parameters are defined --> Retry task with the same parameters
     if 'retry_parameters' not in task_record['kwargs']:
         return 1
@@ -62,11 +64,13 @@ def retry_handler(exception, task_record) -> int:
         for aname,aval in task_record['kwargs']['retry_parameters'][retry_index]['kwargs'].items():
             task_record['kwargs'][aname] = aval
 
-    logger.info('Updated task record {task_record}'.format(json.dumps(
-        task_record,
-        default = str, 
-        indent = 4,
-        sort_keys = True
-    )))
+    logger.info('Updated task record {task_record}'.format(
+        task_record = json.dumps(
+            task_record,
+            default = str, 
+            indent = 4,
+            sort_keys = True
+        )
+    ))
                 
     return 1
