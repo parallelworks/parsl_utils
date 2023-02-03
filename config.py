@@ -149,15 +149,26 @@ for exec_label, exec_conf_i in exec_conf.items():
         )
     )
     
+if 'parsl_retries' in pwargs:
+    retries = int(pwargs['parsl_retries'])
+    from . import retries
+    retry_handler = retries.retry_handler
+else:
+    retries = 0
+    retry_handler = None
 
 if len(executors) > 1:
     config = Config(
+        retries = retries,
+        retry_handler = retry_handler,
         executors = executors
     )
 else:
     from parsl.monitoring.monitoring import MonitoringHub
     executor_address = list(exec_conf.values())[0]['ADDRESS']
     config = Config(
+        retries = retries,
+        retry_handler = retry_handler,
         executors = executors,
         monitoring = MonitoringHub(
             hub_address = executor_address,
