@@ -1,6 +1,27 @@
 import json
-#from . import resource_info
 
+"""
+from . import resource_info
+FIXME: How do we properly display resource messages? We need to find the PW resource name
+with the Parsl resource label 
+print('Resource session messages:', flush = True)
+rmsgs = resource_info.get_resource_messages(exec_conf[task_record['executor']]['POOL'])
+[ print(msg, flush = True) for msg in rmsgs ]
+"""
+
+import logging
+import os
+
+log_file = os.path.join('logs', os.path.basename(__file__).replace('py', 'log'))
+os.makedirs(os.path.dirname(log_file), exist_ok = True)
+
+logging.basicConfig(
+    filename = log_file,
+    format = '%(asctime)s %(levelname)-8s %(message)s',
+    datefmt ='%Y-%m-%d %H:%M:%S',
+    level = logging.INFO
+)
+logger = logging.getLogger()
 
 # FIXNME: Improve logging
 def fix_func_name(func_name: str, task_kwargs: dict) -> str:
@@ -14,34 +35,15 @@ def fix_func_name(func_name: str, task_kwargs: dict) -> str:
     return func_name
 
 
-def get_retry_index(fail_count: int, len_retry_parameters: int) -> int:
-    """
-    Use the fail count to determine the retry_index. 
-    The retry_index is used to access the current retry parameters.
-    """
-    if  fail_count <= len_retry_parameters:
-        return fail_count-1
-    else:
-        # Use last item in retry_parameters for the remaining retries
-        return -1
-
-
-def log_task_record(func_name, fail_history):
-    print('\nRetrying function {}'.format(func_name), flush = True)
-    print('Fail history:', fail_history,flush = True)
-    """
-    FIXME: How do we properly display resource messages? We need to find the PW resource name
-    with the Parsl resource label 
-    """
-    # print('Resource session messages:', flush = True)
-    #rmsgs = resource_info.get_resource_messages(exec_conf[task_record['executor']]['POOL'])
-    #[ print(msg, flush = True) for msg in rmsgs ]
-
 def retry_handler(exception, task_record) -> int:
     func_name = fix_func_name(task_record['func_name'], task_record['kwargs'])
-    log_task_record(func_name, task_record['fail_history'])
-    # If no retry parameters are defined --> Retry function with the same parameters
+    logger.info('Retrying task {task_record}'.format(json.dumps(task_record, indent=4)))
+    # If no retry parameters are defined --> Retry task with the same parameters
     if 'retry_parameters' not in task_record['kwargs']:
+        return 1
+    
+    # If no more parameter replacements are defined for current retry --> Retry task with the same parameters
+    if  task_record['fail_count'] > len(task_record['kwargs']['retry_parameters']):
         return 1
 
     if type(task_record['kwargs']['retry_parameters']) != list:
@@ -50,14 +52,8 @@ def retry_handler(exception, task_record) -> int:
         ), flush = True)
         return 99999
     
-    retry_index = get_retry_index(
-        task_record['fail_count'], 
-        len(task_record['kwargs']['retry_parameters'])
-    )
+    retry_index = task_record['fail_count'] - 1
 
-    print('Resubmitting task with new parameters:', flush = True)
-    print(retry_index, flush=True)
-    print(json.dumps(task_record['kwargs']['retry_parameters'][retry_index], indent = 4), flush = True)
     # Only modify the parameters provided in the retry_parameters variable. Leave the others as is
     if 'executor' in task_record['kwargs']['retry_parameters'][retry_index]:
         task_record['executor'] = task_record['kwargs']['retry_parameters'][retry_index]['executor']
