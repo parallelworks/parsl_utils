@@ -6,24 +6,14 @@ import logging
 import glob
 
 log_file = os.path.join('logs', os.path.basename(__file__).replace('py', 'log'))
-os.makedirs(os.path.dirname(log_file), exist_ok = True)
+logger = logs.get_logger(log_file, 'resource_info')
 
 ## NOTES:
 # NO PRINT STATEMENTS ALLOWED!!
 # PARSL WONT WORK WITH POOLNAME.CLUSTERS.PW!!
 
-logging.basicConfig(
-    filename = log_file,
-    format = '%(asctime)s %(levelname)-8s %(message)s',
-    datefmt ='%Y-%m-%d %H:%M:%S',
-    level = logging.INFO
-)
-logger = logging.getLogger()
-
-
 # URLs
 url_resources = 'https://' + os.environ['PARSL_CLIENT_HOST'] +"/api/resources?key=" + os.environ['PW_API_KEY']
-
 
 def get_pool_info(pool_name, url_resources = url_resources, retries = 3):
     while retries >= 0:

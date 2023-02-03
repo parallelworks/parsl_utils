@@ -1,5 +1,7 @@
 import json
+import os
 
+from . import logs
 """
 from . import resource_info
 FIXME: How do we properly display resource messages? We need to find the PW resource name
@@ -9,19 +11,9 @@ rmsgs = resource_info.get_resource_messages(exec_conf[task_record['executor']]['
 [ print(msg, flush = True) for msg in rmsgs ]
 """
 
-import logging
-import os
 
 log_file = os.path.join('logs', os.path.basename(__file__).replace('py', 'log'))
-os.makedirs(os.path.dirname(log_file), exist_ok = True)
-
-logging.basicConfig(
-    filename = log_file,
-    format = '%(asctime)s %(levelname)-8s %(message)s',
-    datefmt ='%Y-%m-%d %H:%M:%S',
-    level = logging.INFO
-)
-logger = logging.getLogger()
+logger = logs.get_logger(log_file, 'retry_handler')
 
 # FIXNME: Improve logging
 def fix_func_name(func_name: str, task_kwargs: dict) -> str:
