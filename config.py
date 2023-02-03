@@ -151,8 +151,8 @@ for exec_label, exec_conf_i in exec_conf.items():
     
 if 'parsl_retries' in pwargs:
     retries = int(pwargs['parsl_retries'])
-    from . import retries
-    retry_handler = retries.retry_handler
+    from . import retry_handler
+    retry_handler = retry_handler.retry_handler
 else:
     retries = 0
     retry_handler = None
