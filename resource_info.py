@@ -2,8 +2,9 @@ import json
 import os
 import requests
 from time import sleep
-import logging
 import glob
+
+from . import logs
 
 log_file = os.path.join('logs', os.path.basename(__file__).replace('py', 'log'))
 logger = logs.get_logger(log_file, 'resource_info')
