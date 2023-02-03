@@ -20,7 +20,7 @@ def get_retry_index(fail_count: int, len_retry_parameters: int) -> int:
     The retry_index is used to access the current retry parameters.
     """
     if  fail_count <= len_retry_parameters:
-        return fail_count
+        return fail_count-1
     else:
         # Use last item in retry_parameters for the remaining retries
         return -1
@@ -40,7 +40,6 @@ def log_task_record(func_name, fail_history):
 def retry_handler(exception, task_record) -> int:
     func_name = fix_func_name(task_record['func_name'], task_record['kwargs'])
     log_task_record(func_name, task_record['fail_history'])
-    
     # If no retry parameters are defined --> Retry function with the same parameters
     if 'retry_parameters' not in task_record['kwargs']:
         return 1
@@ -57,16 +56,17 @@ def retry_handler(exception, task_record) -> int:
     )
 
     print('Resubmitting task with new parameters:', flush = True)
+    print(retry_index, flush=True)
     print(json.dumps(task_record['kwargs']['retry_parameters'][retry_index], indent = 4), flush = True)
     # Only modify the parameters provided in the retry_parameters variable. Leave the others as is
-    # FIXME: Enable modifying only one arg or kwarg! 
     if 'executor' in task_record['kwargs']['retry_parameters'][retry_index]:
         task_record['executor'] = task_record['kwargs']['retry_parameters'][retry_index]['executor']
 
     if 'args' in task_record['kwargs']['retry_parameters'][retry_index]:
         task_record['args'] = task_record['kwargs']['retry_parameters'][retry_index]['args']
-        
+    
     if 'kwargs' in task_record['kwargs']['retry_parameters'][retry_index]:
-        task_record['kwargs'] = task_record['kwargs']['retry_parameters'][retry_index]['kwargs']
-        
+        for aname,aval in task_record['kwargs']['retry_parameters'][retry_index]['kwargs'].items():
+            task_record['kwargs'][aname] = aval
+                
     return 1
