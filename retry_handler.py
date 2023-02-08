@@ -44,6 +44,10 @@ def retry_handler(exception, task_record) -> int:
     # If no more parameter replacements are defined for current retry --> Retry task with the same parameters
     if  task_record['fail_count'] > len(task_record['kwargs']['retry_parameters']):
         return 1
+    
+    # If retry_parameters is None or empty
+    if not task_record['kwargs']['retry_parameters']:
+        return 1
 
     if type(task_record['kwargs']['retry_parameters']) != list:
         logger.error('Parameter retry_parameters was expected to be list and is type={rhctype}'.format(
