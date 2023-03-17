@@ -42,7 +42,6 @@ class PWGsutil(Staging, RepresentationMixin):
         return None
 
     def stage_out(self, dm, executor, file, parent_fut):
-
         file = utils.fix_local_path(file)
 
         if file.local_path is None:
