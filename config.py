@@ -117,7 +117,7 @@ for exec_label, exec_conf_i in exec_conf.items():
 
         # jumphost is not needed when using the local provider
         storage_access = [ 
-            PWRSyncStaging('file', 'usercontainer', jumphost = None),
+            PWRSyncStaging('usercontainer', jumphost = None),
             PWGsutil()
         ]
 

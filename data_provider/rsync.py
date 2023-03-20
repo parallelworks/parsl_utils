@@ -100,8 +100,8 @@ class PWRSyncStaging(PWStaging):
     an ssh server with the rsync binary installed)
     """
 
-    def __init__(self, scheme, hostname, jumphost = None):
-        super().__init__(scheme)
+    def __init__(self, hostname, jumphost = None):
+        super().__init__('file')
         self.hostname = hostname
         self.jumphost = jumphost
 
