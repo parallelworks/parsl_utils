@@ -1,15 +1,12 @@
 import logging
 import os
 
-from parsl.utils import RepresentationMixin
-from parsl.data_provider.staging import Staging
-
-from . import utils
+from . import pwstaging
 
 logger = logging.getLogger(__name__)
 
 
-class PWGsutil(Staging, RepresentationMixin):
+class PWGsutil(pwstaging.PWStaging):
     """
     This staging provider will execute gsutil on worker nodes
     to stage in files from a GCP bucket.
@@ -17,43 +14,7 @@ class PWGsutil(Staging, RepresentationMixin):
     """
 
     def __init__(self):
-        pass
-
-    def can_stage_in(self, file):
-
-        return file.scheme == 'gs' or file.scheme == 'gs-dir'
-
-    def can_stage_out(self, file):
-        return file.scheme == 'gs' or file.scheme == 'gs-dir'
-
-    def stage_in(self, dm, executor, file, parent_fut):
-
-        file = utils.fix_local_path(file)
-
-        if file.local_path is None:
-            file.local_path = file.filename
-        elif not os.path.isabs(file.local_path):
-            working_dir = dm.dfk.executors[executor].working_dir
-            if working_dir:
-                file.local_path = os.path.join(working_dir, file.local_path)
-            else:
-                file.local_path = file.filename
-        
-        return None
-
-    def stage_out(self, dm, executor, file, parent_fut):
-        file = utils.fix_local_path(file)
-
-        if file.local_path is None:
-            file.local_path = file.filename
-        elif not os.path.isabs(file.local_path):
-            working_dir = dm.dfk.executors[executor].working_dir
-            if working_dir:
-                file.local_path = os.path.join(working_dir, file.local_path)
-            else:
-                file.local_path = file.filename
-        
-        return None
+        super().__init__('gs')
 
     def replace_task(self, dm, executor, file, f):
         logger.debug("Replacing task for gsutil stagein")
