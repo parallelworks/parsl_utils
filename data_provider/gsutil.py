@@ -11,6 +11,9 @@ class PWGsutil(pwstaging.PWStaging):
     This staging provider will execute gsutil on worker nodes
     to stage in files from a GCP bucket.
     Worker nodes must be able to authenticate with GCP
+
+    It will not handle authentication with GCP. It assumes the nodes 
+    are already authenticated.
     """
 
     def __init__(self):
@@ -40,7 +43,7 @@ def in_task_stage_in_wrapper(func, file, working_dir):
             os.makedirs(local_path_dir, exist_ok=True)
 
         logger.debug("gsutil in_task_stage_in_wrapper calling gsutil")
-        if file.scheme == 'gs-dir':
+        if file.path.endswith('/'):
             cmd = "gsutil -m rsync -r gs:/{permanent_filepath} {worker_filepath}"
         else:
             cmd = "gsutil -m cp -r gs:/{permanent_filepath} {worker_filepath}"
@@ -74,7 +77,7 @@ def in_task_stage_out_wrapper(func, file, working_dir):
         result = func(*args, **kwargs)
         logger.debug("gsutil in_task_stage_out_wrapper returned from wrapped function, calling gsutil")
         
-        if file.scheme == 'gs-dir':
+        if file.path.endswith('/'):
             cmd = "gsutil -m rsync -r {worker_filepath} gs:/{permanent_filepath}"
         else:
             cmd = "gsutil -m cp -r {worker_filepath} gs:/{permanent_filepath}"
