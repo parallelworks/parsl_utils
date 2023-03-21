@@ -8,11 +8,15 @@ def url_to_local_path(file):
     """
     Returns the local_path using the url of a native File object since
     local_path is not working properly
+
+    Also removes everything after # from the url
     """
     if '#' in file.url:
         local_path = file.url.split('#')[1]
         if local_path:
             file.local_path = local_path
+    
+    file.url = file.url.split('#')[0]
     
     return file
 
