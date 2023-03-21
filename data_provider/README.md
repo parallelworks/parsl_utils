@@ -14,3 +14,13 @@ The recommended approach to authenticate this provider is described in the steps
 3. Add the following command to the "User Bootstrap" section of the resource definition tab: `gcloud auth activate-service-account --key-file=/contrib/<USER>/service_accounts/my-bucket.json`
 
 Note that when the controller node is authenticated the compute nodes are also authenticated.
+
+### PWS3
+Add the AWS credentials for the bucket to the "User Bootstrap" section of the resource definition tab:
+```
+echo "export AWS_REGION=us-east-1" >> ~/.bashrc
+echo "export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>" >> ~/.bashrc 
+echo "export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>" >> ~/.bashrc 
+echo "export AWS_SESSION_TOKEN=<AWS_SESSION_TOKEN>" >> ~/.bashrc
+```
+
