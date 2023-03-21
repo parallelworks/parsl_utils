@@ -76,7 +76,21 @@ class PWStaging(Staging, RepresentationMixin):
 def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd):
     def wrapper(*args, **kwargs):
         import logging
-        logger = logging.getLogger(__name__)
+        formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+        import os
+        
+        def get_logger(log_file, name, level = logging.DEBUG):
+            os.makedirs(os.path.dirname(log_file), exist_ok = True)
+            handler = logging.FileHandler(log_file)
+            handler.setFormatter(formatter)
+            logger = logging.getLogger(name)
+            logger.setLevel(level)
+            logger.addHandler(handler)
+            return logging.getLogger(name)
+        
+        logger = get_logger(os.path.join(working_dir, 'in_task_stage_in_cmd_wrapper.log'), 'in_task_stage_in_cmd_wrapper')
+
+
         logger.debug("in_task_stage_in_wrapper start")
         if working_dir:
             os.makedirs(working_dir, exist_ok=True)
