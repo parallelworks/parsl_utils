@@ -14,6 +14,7 @@ import shutil
 import parsl_utils
 from parsl_utils.data_provider.rsync import PWRSyncStaging
 from parsl_utils.data_provider.gsutil import PWGsutil
+from parsl_utils.data_provider.s3 import PWS3
 
 
 def read_args():
@@ -89,7 +90,8 @@ for exec_label, exec_conf_i in exec_conf.items():
     #    -> rsync commands needs to use the internal IP of the controller node as jump host to reach usercontainer 
     storage_access = [ 
         PWRSyncStaging('usercontainer', jumphost = exec_conf_i['ADDRESS']),
-        PWGsutil()
+        PWGsutil(),
+        PWS3()
     ]
 
     # Define provider
@@ -118,7 +120,8 @@ for exec_label, exec_conf_i in exec_conf.items():
         # jumphost is not needed when using the local provider
         storage_access = [ 
             PWRSyncStaging('usercontainer', jumphost = None),
-            PWGsutil()
+            PWGsutil(),
+            PWS3()
         ]
 
         provider = LocalProvider(
