@@ -1,5 +1,5 @@
 import os
-
+import uuid
 from . import pwstaging
 
 
@@ -62,14 +62,14 @@ class PWRSyncStaging(pwstaging.PWStaging):
     def replace_task(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_in_cmd(file, jumphost = dm.dfk.executors[executor].address)
-        self.add_command_id_to_logger(cmd)
-        self.logger.debug(f'Replacing task for command <{cmd}>')
+        short_id = str(uuid.uuid3(uuid.NAMESPACE_URL, cmd))[:8]
+        self.logger.debug(f'{short_id} Replacing task for command <{cmd}>')
         return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd, self.logger)
 
     def replace_task_stage_out(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_out_cmd(file, jumphost = dm.dfk.executors[executor].address)
-        self.add_command_id_to_logger(cmd)
-        self.logger.debug(f'Replacing task for command <{cmd}>')
+        short_id = str(uuid.uuid3(uuid.NAMESPACE_URL, cmd))[:8]
+        self.logger.debug(f'{short_id} Replacing task for command <{cmd}>')
         return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd, self.logger)
 
