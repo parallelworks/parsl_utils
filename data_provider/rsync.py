@@ -6,34 +6,34 @@ from . import pwstaging
 logger = logging.getLogger(__name__)
 
 
-def get_stage_in_cmd(file, hostname, jumphost = None):
+def get_stage_in_cmd(file, jumphost = None):
     if jumphost:
         cmd = "rsync -avzq  -e 'ssh -J {jumphost}' {hostname}:{permanent_filepath} {worker_filepath}".format(
             jumphost = jumphost,
-            hostname = hostname,
+            hostname = file.netloc,
             permanent_filepath = file.path,
             worker_filepath = file.local_path
         )
     else:    
         cmd = "rsync -avzq {hostname}:{permanent_filepath} {worker_filepath}".format(
-            hostname=hostname,
-            permanent_filepath=file.path,
-            worker_filepath=file.local_path
+            hostname = file.netloc,
+            permanent_filepath = file.path,
+            worker_filepath = file.local_path
         )
     return cmd
 
-def get_stage_out_cmd(file, hostname, jumphost = None):
+def get_stage_out_cmd(file, jumphost = None):
     if jumphost:
         cmd = "rsync -avzq -e 'ssh -J {jumphost}' --rsync-path=\"mkdir -p {root_path} && rsync\" {worker_filepath} {hostname}:{permanent_filepath}".format(
             jumphost = jumphost,
-            hostname = hostname,
+            hostname = file.netloc,
             permanent_filepath = file.path,
             worker_filepath = file.local_path,
             root_path = os.path.dirname(file.path)
         )
     else:
         cmd = "rsync -avzq --rsync-path=\"mkdir -p {root_path} && rsync\" {worker_filepath} {hostname}:{permanent_filepath}".format(
-            hostname = hostname,
+            hostname = file.netloc,
             permanent_filepath = file.path,
             worker_filepath = file.local_path,
             root_path = os.path.dirname(file.path)
@@ -58,20 +58,18 @@ class PWRSyncStaging(pwstaging.PWStaging):
     an ssh server with the rsync binary installed)
     """
 
-    def __init__(self, hostname, jumphost = None):
+    def __init__(self):
         super().__init__('file')
-        self.hostname = hostname
-        self.jumphost = jumphost
 
     def replace_task(self, dm, executor, file, f):
         logger.debug("Replacing task for rsync stagein")
         working_dir = dm.dfk.executors[executor].working_dir
-        cmd = get_stage_in_cmd(file, self.hostname, jumphost = self.jumphost)
+        cmd = get_stage_in_cmd(file, jumphost = executor.address)
         return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd)
 
     def replace_task_stage_out(self, dm, executor, file, f):
         logger.debug("Replacing task for rsync stageout")
         working_dir = dm.dfk.executors[executor].working_dir
-        cmd = get_stage_out_cmd(file, self.hostname, jumphost = self.jumphost)
+        cmd = get_stage_out_cmd(file, jumphost = executor.address)
         return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd)
 

@@ -89,7 +89,7 @@ for exec_label, exec_conf_i in exec_conf.items():
     # Commands run in worker nodes
     #    -> rsync commands needs to use the internal IP of the controller node as jump host to reach usercontainer 
     storage_access = [ 
-        PWRSyncStaging('usercontainer', jumphost = exec_conf_i['ADDRESS']),
+        PWRSyncStaging(),
         PWGsutil(),
         PWS3()
     ]
@@ -116,13 +116,6 @@ for exec_label, exec_conf_i in exec_conf.items():
             conda_env = exec_conf_i['CONDA_ENV'],
             run_dir = exec_conf_i['RUN_DIR']
         )
-
-        # jumphost is not needed when using the local provider
-        storage_access = [ 
-            PWRSyncStaging('usercontainer', jumphost = None),
-            PWGsutil(),
-            PWS3()
-        ]
 
         provider = LocalProvider(
             worker_init = worker_init,
