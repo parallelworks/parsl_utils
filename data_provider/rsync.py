@@ -60,13 +60,13 @@ class PWRSyncStaging(pwstaging.PWStaging):
         super().__init__('file')
 
     def replace_task(self, dm, executor, file, f):
-        self.logger.debug("Replacing task for rsync stagein")
+        self.logger.debug("Replacing task for PWRSyncStaging stage in")
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_in_cmd(file, jumphost = dm.dfk.executors[executor].address)
         return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd, self.logger)
 
     def replace_task_stage_out(self, dm, executor, file, f):
-        self.logger.debug("Replacing task for rsync stageout")
+        self.logger.debug("Replacing task for PWRSyncStaging stage out")
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_out_cmd(file, jumphost = dm.dfk.executors[executor].address)
         return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd, self.logger)
