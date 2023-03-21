@@ -9,7 +9,7 @@ def get_stage_cmd(origin, destination):
     if origin.endswith('/') or destination.endswith('/'):
         cmd = "aws s3 sync {origin} {destination}"
     else:
-        cmd = "aws s3 cp {origin} {destionation}"
+        cmd = "aws s3 cp {origin} {destination}"
         
     cmd = cmd.format(
         origin = origin, 
