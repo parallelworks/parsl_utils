@@ -5,7 +5,6 @@ from . import rsync
 from . import gsutil
 from . import s3
 
-
 def PWFile(url, local_path):
     if os.path.isabs(url) or '://' in url:
         f = File(url + '#' + local_path)

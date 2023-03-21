@@ -3,7 +3,7 @@ import logging
 formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
 import os
 
-def get_logger(log_file, name, level = logging.DEBUG):
+def get_logger(log_file, name, level = logging.INFO):
     handler = logging.FileHandler(log_file)
     handler.setFormatter(formatter)
     logger = logging.getLogger(name)
@@ -89,7 +89,7 @@ class PWStaging(Staging, RepresentationMixin):
 def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, logger):
     def wrapper(*args, **kwargs):
 
-        logger.debug("in_task_stage_in_wrapper start")
+        logger.info(f'Running command {cmd}')
         if working_dir:
             os.makedirs(working_dir, exist_ok=True)
         
@@ -97,32 +97,34 @@ def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, logger):
         if local_path_dir:
             os.makedirs(local_path_dir, exist_ok=True)
 
-        logger.debug("in_task_stage_in_wrapper calling cmd")
         r = os.system(cmd)
         if r != 0:
-            logger.info("command <{}> returned {}, a {}".format(cmd, r, type(r)))
+            logger.error('Command {cmd} returned {}, a {}'.format(cmd, r, type(r)))
             #raise RuntimeError("command {} returned {}, a {}".format(cmd, r, type(r)))
-            
-        logger.debug("in_task_stage_in_wrapper calling wrapped function")
+
+        logger.debug(f'Command {cmd} executed successfully')
+        logger.debug(f'Calling wrapped function after command {cmd}')
         result = func(*args, **kwargs)
-        logger.debug("in_task_stage_in_wrapper returned from wrapped function")
+        logger.debug(f'Wrapped function after command {cmd} returned')
+
         return result
     return wrapper
 
 
 def in_task_stage_out_cmd_wrapper(func, file, working_dir, cmd, logger):
     def wrapper(*args, **kwargs):
-        
-        logger.debug("in_task_stage_out_wrapper start")
-
-        logger.debug("in_task_stage_out_wrapper calling wrapped function")
+        logger.info(f'Running command {cmd}')
+        logger.debug(f'Calling wrapped function before command {cmd}')
         result = func(*args, **kwargs)
-        logger.debug("in_task_stage_out_wrapper returned from wrapped function, calling cmd")
+        logger.debug(f'Wrapped function before command {cmd} returned')
+
         r = os.system(cmd)
+        
         if r != 0:
+            logger.error('Command {cmd} returned {}, a {}'.format(cmd, r, type(r)))
             # raise RuntimeError("command <{}> returned {}, a {}".format(cmd, r, type(r)))
-            logger.info("command <{}> returned {}, a {}".format(cmd, r, type(r)))
             
-        logger.debug("in_task_stage_out_wrapper returned from wrapper function")
+        logger.debug(f'Command {cmd} executed successfully')
+
         return result
     return wrapper
