@@ -64,12 +64,12 @@ class PWRSyncStaging(pwstaging.PWStaging):
     def replace_task(self, dm, executor, file, f):
         logger.debug("Replacing task for rsync stagein")
         working_dir = dm.dfk.executors[executor].working_dir
-        cmd = get_stage_in_cmd(file, jumphost = executor.address)
+        cmd = get_stage_in_cmd(file, jumphost = dm.dfk.executors[executor].address)
         return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd)
 
     def replace_task_stage_out(self, dm, executor, file, f):
         logger.debug("Replacing task for rsync stageout")
         working_dir = dm.dfk.executors[executor].working_dir
-        cmd = get_stage_out_cmd(file, jumphost = executor.address)
+        cmd = get_stage_out_cmd(file, jumphost = dm.dfk.executors[executor].address)
         return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd)
 
