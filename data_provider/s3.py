@@ -17,7 +17,7 @@ class PWS3(pwstaging.PWStaging):
     """
 
     def __init__(self):
-        super().__init__('gs')
+        super().__init__('s3')
 
     def replace_task(self, dm, executor, file, f):
         logger.debug("Replacing task for aws s3 stagein")
