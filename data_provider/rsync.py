@@ -5,6 +5,42 @@ from . import pwstaging
 
 logger = logging.getLogger(__name__)
 
+
+def get_stage_in_cmd(file, hostname, jumphost = None):
+    if jumphost:
+        cmd = "rsync -avzq  -e 'ssh -J {jumphost}' {hostname}:{permanent_filepath} {worker_filepath}".format(
+            jumphost = jumphost,
+            hostname = hostname,
+            permanent_filepath = file.path,
+            worker_filepath = file.local_path
+        )
+    else:    
+        cmd = "rsync -avzq {hostname}:{permanent_filepath} {worker_filepath}".format(
+            hostname=hostname,
+            permanent_filepath=file.path,
+            worker_filepath=file.local_path
+        )
+    return cmd
+
+def get_stage_out_cmd(file, hostname, jumphost = None):
+    if jumphost:
+        cmd = "rsync -avzq -e 'ssh -J {jumphost}' --rsync-path=\"mkdir -p {root_path} && rsync\" {worker_filepath} {hostname}:{permanent_filepath}".format(
+            jumphost = jumphost,
+            hostname = hostname,
+            permanent_filepath = file.path,
+            worker_filepath = file.local_path,
+            root_path = os.path.dirname(file.path)
+        )
+    else:
+        cmd = "rsync -avzq --rsync-path=\"mkdir -p {root_path} && rsync\" {worker_filepath} {hostname}:{permanent_filepath}".format(
+            hostname = hostname,
+            permanent_filepath = file.path,
+            worker_filepath = file.local_path,
+            root_path = os.path.dirname(file.path)
+        )
+
+    return cmd
+
 class PWRSyncStaging(pwstaging.PWStaging):
     """
     This is a modification of the official staging provider 
@@ -30,83 +66,12 @@ class PWRSyncStaging(pwstaging.PWStaging):
     def replace_task(self, dm, executor, file, f):
         logger.debug("Replacing task for rsync stagein")
         working_dir = dm.dfk.executors[executor].working_dir
-        return in_task_stage_in_wrapper(f, file, working_dir, self.hostname, self.jumphost)
+        cmd = get_stage_in_cmd(file, self.hostname, jumphost = self.jumphost)
+        return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd)
 
     def replace_task_stage_out(self, dm, executor, file, f):
         logger.debug("Replacing task for rsync stageout")
         working_dir = dm.dfk.executors[executor].working_dir
-        return in_task_stage_out_wrapper(f, file, working_dir, self.hostname, self.jumphost)
+        cmd = get_stage_out_cmd(file, self.hostname, jumphost = self.jumphost)
+        return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd)
 
-
-def in_task_stage_in_wrapper(func, file, working_dir, hostname, jumphost):
-    def wrapper(*args, **kwargs):
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.debug("rsync in_task_stage_in_wrapper start")
-        if working_dir:
-            os.makedirs(working_dir, exist_ok=True)
-        
-        local_path_dir = os.path.dirname(file.local_path)
-        if local_path_dir:
-            os.makedirs(local_path_dir, exist_ok=True)
-
-        logger.debug("rsync in_task_stage_in_wrapper calling rsync")
-        if jumphost:
-            cmd = "rsync -avzq  -e 'ssh -J {jumphost}' {hostname}:{permanent_filepath} {worker_filepath}".format(
-                jumphost = jumphost,
-                hostname = hostname,
-                permanent_filepath = file.path,
-                worker_filepath = file.local_path
-            )
-        else:    
-            cmd = "rsync -avzq {hostname}:{permanent_filepath} {worker_filepath}".format(
-                hostname=hostname,
-                permanent_filepath=file.path,
-                worker_filepath=file.local_path
-            )
-
-        r = os.system(cmd)
-        if r != 0:
-            logger.info("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
-            #raise RuntimeError("rsync command {} returned {}, a {}".format(cmd, r, type(r)))
-            
-        logger.debug("rsync in_task_stage_in_wrapper calling wrapped function")
-        result = func(*args, **kwargs)
-        logger.debug("rsync in_task_stage_in_wrapper returned from wrapped function")
-        return result
-    return wrapper
-
-
-def in_task_stage_out_wrapper(func, file, working_dir, hostname, jumphost):
-    def wrapper(*args, **kwargs):
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.debug("rsync in_task_stage_out_wrapper start")
-
-        logger.debug("rsync in_task_stage_out_wrapper calling wrapped function")
-        result = func(*args, **kwargs)
-        logger.debug("rsync in_task_stage_out_wrapper returned from wrapped function, calling rsync")
-        if jumphost:
-            cmd = "rsync -avzq -e 'ssh -J {jumphost}' --rsync-path=\"mkdir -p {root_path} && rsync\" {worker_filepath} {hostname}:{permanent_filepath}".format(
-                jumphost = jumphost,
-                hostname = hostname,
-                permanent_filepath = file.path,
-                worker_filepath = file.local_path,
-                root_path = os.path.dirname(file.path)
-            )
-        else:
-            cmd = "rsync -avzq --rsync-path=\"mkdir -p {root_path} && rsync\" {worker_filepath} {hostname}:{permanent_filepath}".format(
-                hostname = hostname,
-                permanent_filepath = file.path,
-                worker_filepath = file.local_path,
-                root_path = os.path.dirname(file.path)
-            )
-
-        r = os.system(cmd)
-        if r != 0:
-            # raise RuntimeError("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
-            logger.info("rsync command <{}> returned {}, a {}".format(cmd, r, type(r)))
-            
-        logger.debug("rsync in_task_stage_out_wrapper returned from rsync")
-        return result
-    return wrapper

@@ -1,5 +1,6 @@
 import logging
 import os
+from functools import partial
 
 from . import pwstaging
 
@@ -34,10 +35,12 @@ class PWS3(pwstaging.PWStaging):
     def replace_task(self, dm, executor, file, f):
         logger.debug("Replacing task for aws s3 stagein")
         working_dir = dm.dfk.executors[executor].working_dir
-        return pwstaging.in_task_stage_in_wrapper(f, file, working_dir, get_stage_cmd)
+        cmd = get_stage_cmd(origin = file.url, destination = file.local_path)
+        return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd)
 
     def replace_task_stage_out(self, dm, executor, file, f):
         logger.debug("Replacing task for aws s3 stageout")
         working_dir = dm.dfk.executors[executor].working_dir
-        return pwstaging.in_task_stage_out_wrapper(f, file, working_dir, get_stage_cmd)
+        cmd = get_stage_cmd(origin = file.local_path, destination = file.url)
+        return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd)
     
