@@ -59,10 +59,10 @@ class PWStaging(Staging, RepresentationMixin):
     https://parsl.readthedocs.io/en/latest/stubs/parsl.data_provider.rsync.RSyncStaging.html
     The original staging provider was generalized to act as a parent class for PW staging providers
     """
+    logger = get_logger('data_provider.log', 'PWStaging', level = logging.DEBUG)
 
     def __init__(self, scheme):
         self.scheme = scheme
-        self.logger = get_logger('data_provider.log', 'PWStaging', level = logging.DEBUG)
 
 
     def add_command_id_to_logger(self, cmd):
