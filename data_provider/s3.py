@@ -5,30 +5,16 @@ from . import pwstaging
 
 logger = logging.getLogger(__name__)
 
-def get_stage_in_cmd(file):
-    if file.path.endswith('/'):
-        cmd = "aws s3 sync s3:/{permanent_filepath} {worker_filepath}"
+def get_stage_cmd(origin, destination):
+    if origin.endswith('/') or destination.endswith('/'):
+        cmd = "aws s3 sync {origin} {destination}"
     else:
-        cmd = "aws s3 cp s3:/{permanent_filepath} {worker_filepath}"
+        cmd = "aws s3 cp {origin} {destionation}"
         
     cmd = cmd.format(
-        permanent_filepath = file.path, 
-        worker_filepath = file.local_path
+        origin = origin, 
+        destination = destination
     )
-    return cmd
-
-
-def get_stage_out_cmd(file):
-    if file.path.endswith('/'):
-        cmd = "aws s3 sync {worker_filepath} s3:/{permanent_filepath}"
-    else:
-        cmd = "aws s3 cp {worker_filepath} s3:/{permanent_filepath}"
-
-    cmd = cmd.format(
-        permanent_filepath = file.path,
-        worker_filepath = file.local_path,
-    )
-
     return cmd
 
 
@@ -48,10 +34,10 @@ class PWS3(pwstaging.PWStaging):
     def replace_task(self, dm, executor, file, f):
         logger.debug("Replacing task for aws s3 stagein")
         working_dir = dm.dfk.executors[executor].working_dir
-        return pwstaging.in_task_stage_in_wrapper(f, file, working_dir, get_stage_in_cmd)
+        return pwstaging.in_task_stage_in_wrapper(f, file, working_dir, get_stage_cmd)
 
     def replace_task_stage_out(self, dm, executor, file, f):
         logger.debug("Replacing task for aws s3 stageout")
         working_dir = dm.dfk.executors[executor].working_dir
-        return pwstaging.in_task_stage_out_wrapper(f, file, working_dir, get_stage_out_cmd)
+        return pwstaging.in_task_stage_out_wrapper(f, file, working_dir, get_stage_cmd)
     

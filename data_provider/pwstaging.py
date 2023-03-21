@@ -92,7 +92,7 @@ def in_task_stage_in_wrapper(func, file, working_dir, get_cmd_func):
             os.makedirs(local_path_dir, exist_ok=True)
 
         logger.debug("in_task_stage_in_wrapper calling cmd")
-        cmd = get_cmd_func(file)
+        cmd = get_cmd_func(origin = file.url, destination = file.local_path)
         r = os.system(cmd)
         if r != 0:
             logger.info("command <{}> returned {}, a {}".format(cmd, r, type(r)))
@@ -114,7 +114,7 @@ def in_task_stage_out_wrapper(func, file, working_dir, get_cmd_func):
         logger.debug("in_task_stage_out_wrapper calling wrapped function")
         result = func(*args, **kwargs)
         logger.debug("in_task_stage_out_wrapper returned from wrapped function, calling cmd")
-        cmd = get_cmd_func(file)
+        cmd = get_cmd_func(origin = file.local_path, destination = file.url)
         r = os.system(cmd)
         if r != 0:
             # raise RuntimeError("command <{}> returned {}, a {}".format(cmd, r, type(r)))
