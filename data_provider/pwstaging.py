@@ -88,9 +88,6 @@ class PWStaging(Staging, RepresentationMixin):
 
 def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, logger):
     def wrapper(*args, **kwargs):
-        
-        logger = get_logger(os.path.join(working_dir, 'in_task_stage_in_cmd_wrapper.log'), 'in_task_stage_in_cmd_wrapper')
-
 
         logger.debug("in_task_stage_in_wrapper start")
         if working_dir:
@@ -115,8 +112,7 @@ def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, logger):
 
 def in_task_stage_out_cmd_wrapper(func, file, working_dir, cmd, logger):
     def wrapper(*args, **kwargs):
-        logger = get_logger(os.path.join(working_dir, 'in_task_stage_out_cmd_wrapper.log'), 'in_task_stage_out_cmd_wrapper')
-
+        
         logger.debug("in_task_stage_out_wrapper start")
 
         logger.debug("in_task_stage_out_wrapper calling wrapped function")
