@@ -1,8 +1,4 @@
-import logging
-
 from . import pwstaging
-
-logger = logging.getLogger(__name__)
 
 def get_stage_cmd(origin, destination):
     if origin.endswith('/') or destination.endswith('/'):
@@ -31,14 +27,14 @@ class PWS3(pwstaging.PWStaging):
         super().__init__('s3')
 
     def replace_task(self, dm, executor, file, f):
-        logger.debug("Replacing task for aws s3 stagein")
+        self.logger.debug("Replacing task for aws s3 stagein")
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_cmd(origin = file.url, destination = file.local_path)
-        return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd)
+        return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd, self.logger)
 
     def replace_task_stage_out(self, dm, executor, file, f):
-        logger.debug("Replacing task for aws s3 stageout")
+        self.logger.debug("Replacing task for aws s3 stageout")
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_cmd(origin = file.local_path, destination = file.url)
-        return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd)
+        return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd, self.logger)
     

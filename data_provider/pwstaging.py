@@ -1,4 +1,15 @@
 import os
+import logging
+formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+import os
+
+def get_logger(log_file, name, level = logging.DEBUG):
+    handler = logging.FileHandler(log_file)
+    handler.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+    return logging.getLogger(name)
 
 from parsl.utils import RepresentationMixin
 from parsl.data_provider.staging import Staging
@@ -47,6 +58,8 @@ class PWStaging(Staging, RepresentationMixin):
     The original staging provider was generalized to act as a parent class for PW staging providers
     """
 
+    logger = get_logger('data_provider.log', 'PWStaging', level = logging.DEBUG)
+
     def __init__(self, scheme):
         self.scheme = scheme
 
@@ -73,20 +86,8 @@ class PWStaging(Staging, RepresentationMixin):
         pass
 
 
-def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd):
+def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, logger):
     def wrapper(*args, **kwargs):
-        import logging
-        formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
-        import os
-        
-        def get_logger(log_file, name, level = logging.DEBUG):
-            os.makedirs(os.path.dirname(log_file), exist_ok = True)
-            handler = logging.FileHandler(log_file)
-            handler.setFormatter(formatter)
-            logger = logging.getLogger(name)
-            logger.setLevel(level)
-            logger.addHandler(handler)
-            return logging.getLogger(name)
         
         logger = get_logger(os.path.join(working_dir, 'in_task_stage_in_cmd_wrapper.log'), 'in_task_stage_in_cmd_wrapper')
 
@@ -112,21 +113,8 @@ def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd):
     return wrapper
 
 
-def in_task_stage_out_cmd_wrapper(func, file, working_dir, cmd):
+def in_task_stage_out_cmd_wrapper(func, file, working_dir, cmd, logger):
     def wrapper(*args, **kwargs):
-        import logging
-        formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
-        import os
-        
-        def get_logger(log_file, name, level = logging.DEBUG):
-            os.makedirs(os.path.dirname(log_file), exist_ok = True)
-            handler = logging.FileHandler(log_file)
-            handler.setFormatter(formatter)
-            logger = logging.getLogger(name)
-            logger.setLevel(level)
-            logger.addHandler(handler)
-            return logging.getLogger(name)
-        
         logger = get_logger(os.path.join(working_dir, 'in_task_stage_out_cmd_wrapper.log'), 'in_task_stage_out_cmd_wrapper')
 
         logger.debug("in_task_stage_out_wrapper start")
