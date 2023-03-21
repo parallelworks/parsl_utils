@@ -67,10 +67,10 @@ class PWStaging(Staging, RepresentationMixin):
 
     def add_command_id_to_logger(self, cmd):
         short_id = str(uuid.uuid3(uuid.NAMESPACE_URL, cmd))[:8]
-        for handler in self.logger.handlers:
-            handler_formatter = handler.formatter
-            handler_formatter._fmt = '{} [{}]'.format(handler_formatter._fmt, short_id)
-            handler.setFormatter(handler_formatter)
+        #for handler in self.logger.handlers:
+        #    handler_formatter = handler.formatter
+        #    handler_formatter._fmt = '{} [{}]'.format(handler_formatter._fmt, short_id)
+        #    handler.setFormatter(handler_formatter)
 
     def can_stage_in(self, file):
         return file.scheme == self.scheme
