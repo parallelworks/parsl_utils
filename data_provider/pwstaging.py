@@ -78,3 +78,48 @@ class PWStaging(Staging, RepresentationMixin):
     def replace_task_stage_out(self, dm, executor, file, f):
         pass
 
+
+def in_task_stage_in_wrapper(func, file, working_dir, get_cmd_func):
+    def wrapper(*args, **kwargs):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.debug("in_task_stage_in_wrapper start")
+        if working_dir:
+            os.makedirs(working_dir, exist_ok=True)
+        
+        local_path_dir = os.path.dirname(file.local_path)
+        if local_path_dir:
+            os.makedirs(local_path_dir, exist_ok=True)
+
+        logger.debug("in_task_stage_in_wrapper calling cmd")
+        cmd = get_cmd_func(file)
+        r = os.system(cmd)
+        if r != 0:
+            logger.info("command <{}> returned {}, a {}".format(cmd, r, type(r)))
+            #raise RuntimeError("command {} returned {}, a {}".format(cmd, r, type(r)))
+            
+        logger.debug("in_task_stage_in_wrapper calling wrapped function")
+        result = func(*args, **kwargs)
+        logger.debug("in_task_stage_in_wrapper returned from wrapped function")
+        return result
+    return wrapper
+
+
+def in_task_stage_out_wrapper(func, file, working_dir, get_cmd_func):
+    def wrapper(*args, **kwargs):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.debug("in_task_stage_out_wrapper start")
+
+        logger.debug("in_task_stage_out_wrapper calling wrapped function")
+        result = func(*args, **kwargs)
+        logger.debug("in_task_stage_out_wrapper returned from wrapped function, calling cmd")
+        cmd = get_cmd_func(file)
+        r = os.system(cmd)
+        if r != 0:
+            # raise RuntimeError("command <{}> returned {}, a {}".format(cmd, r, type(r)))
+            logger.info("command <{}> returned {}, a {}".format(cmd, r, type(r)))
+            
+        logger.debug("in_task_stage_out_wrapper returned from wrapper function")
+        return result
+    return wrapper
