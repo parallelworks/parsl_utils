@@ -29,11 +29,11 @@ class PWS3(pwstaging.PWStaging):
     def replace_task(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_cmd(origin = file.url, destination = file.local_path)
-        cmd_id = self._get_cmd_id(self, cmd)  
+        cmd_id = self._get_cmd_id(cmd)  
         return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd, cmd_id, self.logger.getEffectiveLevel())
     
     def replace_task_stage_out(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_cmd(origin = file.local_path, destination = file.url)
-        cmd_id = self._get_cmd_id(self, cmd)  
+        cmd_id = self._get_cmd_id(cmd)  
         return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd, cmd_id, self.logger.getEffectiveLevel())
