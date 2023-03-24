@@ -25,7 +25,7 @@ class PWS3(pwstaging.PWStaging):
     """
 
     def __init__(self, executor_label, logging_level = logging.INFO):
-        super().__init__('s3', executor_label)
+        super().__init__('s3')
         self.logger = pwstaging.get_logger(f'{executor_label}/s3_data_provider.log', executor_label, level = logging_level)
 
 

@@ -55,7 +55,7 @@ class PWRSyncStaging(pwstaging.PWStaging):
     """
 
     def __init__(self, executor_label, logging_level = logging.INFO):
-        super().__init__('file', executor_label)
+        super().__init__('file')
         self.logger = pwstaging.get_logger(f'{executor_label}/rsync_data_provider.log', executor_label, level = logging_level)
 
 

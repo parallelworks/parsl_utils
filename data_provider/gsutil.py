@@ -27,7 +27,7 @@ class PWGsutil(pwstaging.PWStaging):
     """
 
     def __init__(self, executor_label, logging_level = logging.INFO):
-        super().__init__('gs', executor_label)
+        super().__init__('gs')
         self.logger = pwstaging.get_logger(f'{executor_label}/gs_data_provider.log', executor_label, level = logging_level)
 
     def replace_task(self, dm, executor, file, f):
