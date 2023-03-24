@@ -32,7 +32,7 @@ class PWGsutil(pwstaging.PWStaging):
     def replace_task(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_cmd(origin = file.url, destination = file.local_path)
-        task_logger = self._set_task_logger(cmd, working_dir)    
+        task_logger = self._set_task_logger(cmd, working_dir)   
         return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd, task_logger)
 
     def replace_task_stage_out(self, dm, executor, file, f):

@@ -10,7 +10,7 @@ cp parsl_utils/kill.sh ./
 
 # Clear logs
 rm -rf logs/
-mkdir -p logs/data_provider
+mkdir -p logs/
 
 # replace the executors file if an override exists
 if [ -f "executors.override.json" ];then

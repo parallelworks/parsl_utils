@@ -62,7 +62,7 @@ class PWStaging(Staging, RepresentationMixin):
     def __init__(self, scheme, executor_label, logging_level = logging.DEBUG):
         self.scheme = scheme
         self.executor_label = executor_label
-        self.logger = get_logger(f'logs/data_provider/{executor_label}.log', executor_label, level = logging_level)
+        self.logger = get_logger(f'{executor_label}/data_provider.log', executor_label, level = logging_level)
 
     def _set_task_logger(self, cmd, working_dir):
         # Get unique id for each command
