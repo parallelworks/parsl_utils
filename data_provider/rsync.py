@@ -1,6 +1,5 @@
-import os
-from . import pwstaging
-
+import logging
+from . import pwstaging, get_logger
 
 
 def get_stage_in_cmd(file, jumphost = None):
@@ -55,8 +54,10 @@ class PWRSyncStaging(pwstaging.PWStaging):
     an ssh server with the rsync binary installed)
     """
 
-    def __init__(self, executor_label):
+    def __init__(self, executor_label, logging_level = logging.INFO):
         super().__init__('file', executor_label)
+        self.logger = get_logger(f'{executor_label}/rsync_data_provider.log', executor_label, level = logging_level)
+
 
     def replace_task(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir

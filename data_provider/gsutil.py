@@ -1,4 +1,5 @@
-from . import pwstaging
+import logging
+from . import pwstaging, get_logger
 
 def get_stage_cmd(origin, destination):
 
@@ -25,8 +26,9 @@ class PWGsutil(pwstaging.PWStaging):
     are already authenticated.
     """
 
-    def __init__(self, executor_label):
+    def __init__(self, executor_label, logging_level = logging.INFO):
         super().__init__('gs', executor_label)
+        self.logger = get_logger(f'{executor_label}/gs_data_provider.log', executor_label, level = logging_level)
 
     def replace_task(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
