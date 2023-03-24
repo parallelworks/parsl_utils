@@ -63,6 +63,8 @@ class PWStaging(Staging, RepresentationMixin):
         self.scheme = scheme
         self.executor_label = executor_label
         logger_name = scheme + '-' + executor_label
+        # Needs to have unique name and file
+        # If two loggers have the same name but different files they will write all logs to both files
         self.logger = get_logger(f'{executor_label}/{scheme}_data_provider.log', logger_name, level = logging_level)
 
     def _get_cmd_id(self, cmd):
