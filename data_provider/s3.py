@@ -1,5 +1,5 @@
 import logging
-from . import pwstaging, get_logger
+from . import pwstaging
 
 def get_stage_cmd(origin, destination):
     if origin.endswith('/') or destination.endswith('/'):
