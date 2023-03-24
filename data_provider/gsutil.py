@@ -1,4 +1,3 @@
-import uuid
 from . import pwstaging
 
 def get_stage_cmd(origin, destination):
@@ -32,12 +31,12 @@ class PWGsutil(pwstaging.PWStaging):
     def replace_task(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_cmd(origin = file.url, destination = file.local_path)
-        task_logger = self._set_task_logger(cmd, working_dir)   
-        return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd, task_logger)
+        cmd_id = self.get_cmd_id(self, cmd)  
+        return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd, cmd_id, self.logger.getEffectiveLevel())
 
     def replace_task_stage_out(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_cmd(origin = file.local_path, destination = file.url)
-        task_logger = self._set_task_logger(cmd, working_dir)    
-        return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd, task_logger)
+        cmd_id = self.get_cmd_id(self, cmd)  
+        return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd, cmd_id, self.logger.getEffectiveLevel())
 

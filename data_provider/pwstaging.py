@@ -8,7 +8,7 @@ from parsl.data_provider.staging import Staging
 formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
 
 def get_logger(log_file, name, level = logging.INFO):
-    #os.makedirs(os.path.dirname(log_file), exist_ok = True)
+    os.makedirs(os.path.dirname(log_file), exist_ok = True)
     handler = logging.FileHandler(log_file)
     handler.setFormatter(formatter)
     logger = logging.getLogger(name)
@@ -64,14 +64,12 @@ class PWStaging(Staging, RepresentationMixin):
         self.executor_label = executor_label
         self.logger = get_logger(f'{executor_label}/data_provider.log', executor_label, level = logging_level)
 
-    def _set_task_logger(self, cmd, working_dir):
+    def _get_cmd_id(self, cmd):
         # Get unique id for each command
         cmd_id = str(uuid.uuid3(uuid.NAMESPACE_URL, cmd))
         self.logger.info(f'Replacing task for command <{cmd}> with id <{cmd_id}>')
-        # FIXME: Save all these logs in the data_transfer directory
-        # Uses same level as the self.logger
-        return get_logger(f'{working_dir}/{cmd_id}.log', cmd_id, level = self.logger.getEffectiveLevel())
-
+        return cmd_id
+    
     def can_stage_in(self, file):
         return file.scheme == self.scheme
 
@@ -95,9 +93,10 @@ class PWStaging(Staging, RepresentationMixin):
         pass
 
 
-def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, logger):
+def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, cmd_id, log_level):
     def wrapper(*args, **kwargs):
-        logger.info(f'Running command')
+        logger = get_logger(f'data_provider/{cmd_id}.log', cmd_id, level = log_level)
+        logger.info('Running command')
         if working_dir:
             os.makedirs(working_dir, exist_ok=True)
         
@@ -110,21 +109,22 @@ def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, logger):
             logger.error('Command returned {}, a {}'.format(r, type(r)))
             #raise RuntimeError("command {} returned {}, a {}".format(cmd, r, type(r)))
 
-        logger.debug(f'Command executed successfully')
-        logger.debug(f'Calling wrapped function')
+        logger.debug('Command executed successfully')
+        logger.debug('Calling wrapped function')
         result = func(*args, **kwargs)
-        logger.debug(f'Wrapped function returned')
+        logger.debug('Wrapped function returned')
 
         return result
     return wrapper
 
 
-def in_task_stage_out_cmd_wrapper(func, file, working_dir, cmd, logger):
+def in_task_stage_out_cmd_wrapper(func, file, working_dir, cmd, cmd_id, log_level):
     def wrapper(*args, **kwargs):
-        logger.info(f'Running command')
-        logger.debug(f'Calling wrapped function')
+        logger = get_logger(f'data_provider/{cmd_id}.log', cmd_id, level = log_level)
+        logger.info('Running command')
+        logger.debug('Calling wrapped function')
         result = func(*args, **kwargs)
-        logger.debug(f'Wrapped function returned')
+        logger.debug('Wrapped function returned')
 
         r = os.system(cmd)
         
@@ -132,7 +132,7 @@ def in_task_stage_out_cmd_wrapper(func, file, working_dir, cmd, logger):
             logger.error('Command returned {}, a {}'.format(r, type(r)))
             # raise RuntimeError("command <{}> returned {}, a {}".format(cmd, r, type(r)))
 
-        logger.debug(f'Command executed successfully')
+        logger.debug('Command executed successfully')
 
         return result
     return wrapper
