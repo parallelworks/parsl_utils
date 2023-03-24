@@ -59,8 +59,11 @@ class PWStaging(Staging, RepresentationMixin):
     https://parsl.readthedocs.io/en/latest/stubs/parsl.data_provider.rsync.RSyncStaging.html
     The original staging provider was generalized to act as a parent class for PW staging providers
     """
-    def __init__(self, scheme):
+    def __init__(self, scheme, executor_label, logging_level = logging.DEBUG):
         self.scheme = scheme
+        self.executor_label = executor_label
+        logger_name = scheme + '-' + executor_label
+        self.logger = get_logger(f'{executor_label}/{scheme}_data_provider.log', logger_name, level = logging_level)
 
     def _get_cmd_id(self, cmd):
         # Get unique id for each command
@@ -94,7 +97,7 @@ class PWStaging(Staging, RepresentationMixin):
 def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, cmd_id, log_level):
     def wrapper(*args, **kwargs):
         logger = get_logger(f'data_provider/{cmd_id}.log', cmd_id, level = log_level)
-        logger.info(f'Running command <{cmd}> with id <{cmd_id}>')
+        logger.info('Running command')
         if working_dir:
             os.makedirs(working_dir, exist_ok=True)
         

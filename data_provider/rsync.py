@@ -56,11 +56,9 @@ class PWRSyncStaging(pwstaging.PWStaging):
     """
 
     def __init__(self, executor_label, logging_level = logging.INFO):
-        super().__init__('file')
         self.executor_label = executor_label
         self.logging_level = logging_level
-        self.logger = pwstaging.get_logger(f'{self.executor_label}/rsync_data_provider.log', self.executor_label, level = self.logging_level)
-
+        super().__init__('file', executor_label, logging_level = logging_level)
 
     def replace_task(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
