@@ -24,8 +24,8 @@ class PWS3(pwstaging.PWStaging):
     are already authenticated.
     """
 
-    def __init__(self):
-        super().__init__('s3')
+    def __init__(self, executor_label):
+        super().__init__('s3', executor_label)
 
     def replace_task(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir

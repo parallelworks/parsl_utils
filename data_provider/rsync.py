@@ -56,8 +56,8 @@ class PWRSyncStaging(pwstaging.PWStaging):
     an ssh server with the rsync binary installed)
     """
 
-    def __init__(self):
-        super().__init__('file')
+    def __init__(self, executor_label):
+        super().__init__('file', executor_label)
 
     def replace_task(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
