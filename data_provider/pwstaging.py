@@ -64,13 +64,13 @@ class PWStaging(Staging, RepresentationMixin):
         self.executor_label = executor_label
         self.logger = get_logger(f'logs/data_provider/{executor_label}.log', executor_label, level = logging_level)
 
-    def _set_task_logger(self, cmd):
+    def _set_task_logger(self, cmd, working_dir):
         # Get unique id for each command
         cmd_id = str(uuid.uuid3(uuid.NAMESPACE_URL, cmd))
-        self.logger.info(f'{cmd_id} Replacing task for command <{cmd}>')
+        self.logger.info(f'Replacing task for command <{cmd}> with id <{cmd_id}>')
         # FIXME: Save all these logs in the data_transfer directory
         # Uses same level as the self.logger
-        return get_logger(f'{cmd_id}.log', cmd_id, level = self.logger.getEffectiveLevel())
+        return get_logger(f'{working_dir}/{cmd_id}.log', cmd_id, level = self.logger.getEffectiveLevel())
 
     def can_stage_in(self, file):
         return file.scheme == self.scheme
@@ -97,9 +97,6 @@ class PWStaging(Staging, RepresentationMixin):
 
 def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, logger):
     def wrapper(*args, **kwargs):
-        import uuid
-        short_id = str(uuid.uuid3(uuid.NAMESPACE_URL, cmd))[:8]
-
         logger.info(f'Running command')
         if working_dir:
             os.makedirs(working_dir, exist_ok=True)
@@ -124,9 +121,6 @@ def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, logger):
 
 def in_task_stage_out_cmd_wrapper(func, file, working_dir, cmd, logger):
     def wrapper(*args, **kwargs):
-        import uuid
-        short_id = str(uuid.uuid3(uuid.NAMESPACE_URL, cmd))[:8]
-
         logger.info(f'Running command')
         logger.debug(f'Calling wrapped function')
         result = func(*args, **kwargs)
