@@ -97,7 +97,7 @@ class PWStaging(Staging, RepresentationMixin):
 def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, cmd_id, log_level):
     def wrapper(*args, **kwargs):
         logger = get_logger(f'data_provider/{cmd_id}.log', cmd_id, level = log_level)
-        logger.info('Running command')
+        logger.info(f'Running command <{cmd}> with id <{cmd_id}>')
         if working_dir:
             os.makedirs(working_dir, exist_ok=True)
         
