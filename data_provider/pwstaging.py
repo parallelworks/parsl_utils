@@ -1,17 +1,20 @@
 import os
+import uuid
 import logging
+
+from parsl.utils import RepresentationMixin
+from parsl.data_provider.staging import Staging
+
 formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
 
 def get_logger(log_file, name, level = logging.INFO):
+    #os.makedirs(os.path.dirname(log_file), exist_ok = True)
     handler = logging.FileHandler(log_file)
     handler.setFormatter(formatter)
     logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.addHandler(handler)
     return logging.getLogger(name)
-
-from parsl.utils import RepresentationMixin
-from parsl.data_provider.staging import Staging
 
 
 def url_to_local_path(file):
@@ -56,12 +59,18 @@ class PWStaging(Staging, RepresentationMixin):
     https://parsl.readthedocs.io/en/latest/stubs/parsl.data_provider.rsync.RSyncStaging.html
     The original staging provider was generalized to act as a parent class for PW staging providers
     """
-
-    logger = get_logger('data_provider.log', 'PWStaging', level = logging.DEBUG)
-
-    def __init__(self, scheme):
+    def __init__(self, scheme, executor_label, logging_level = logging.DEBUG):
         self.scheme = scheme
+        self.executor_label = executor_label
+        self.logger = get_logger(f'logs/data_provider/{executor_label}.log', executor_label, level = logging_level)
 
+    def _set_task_logger(self, cmd):
+        # Get unique id for each command
+        cmd_id = str(uuid.uuid3(uuid.NAMESPACE_URL, cmd))
+        self.logger.info(f'{cmd_id} Replacing task for command <{cmd}>')
+        # FIXME: Save all these logs in the data_transfer directory
+        # Uses same level as the self.logger
+        return get_logger(f'{cmd_id}.log', cmd_id, level = self.logger.getEffectiveLevel())
 
     def can_stage_in(self, file):
         return file.scheme == self.scheme
@@ -90,7 +99,8 @@ def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, logger):
     def wrapper(*args, **kwargs):
         import uuid
         short_id = str(uuid.uuid3(uuid.NAMESPACE_URL, cmd))[:8]
-        logger.info(f'{short_id} Running command')
+
+        logger.info(f'Running command')
         if working_dir:
             os.makedirs(working_dir, exist_ok=True)
         
@@ -100,13 +110,13 @@ def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, logger):
 
         r = os.system(cmd)
         if r != 0:
-            logger.error('{short_id} Command returned {}, a {}'.format(r, type(r)))
+            logger.error('Command returned {}, a {}'.format(r, type(r)))
             #raise RuntimeError("command {} returned {}, a {}".format(cmd, r, type(r)))
 
-        logger.debug(f'{short_id} Command executed successfully')
-        logger.debug(f'{short_id} Calling wrapped function')
+        logger.debug(f'Command executed successfully')
+        logger.debug(f'Calling wrapped function')
         result = func(*args, **kwargs)
-        logger.debug(f'{short_id} Wrapped function returned')
+        logger.debug(f'Wrapped function returned')
 
         return result
     return wrapper
@@ -116,18 +126,19 @@ def in_task_stage_out_cmd_wrapper(func, file, working_dir, cmd, logger):
     def wrapper(*args, **kwargs):
         import uuid
         short_id = str(uuid.uuid3(uuid.NAMESPACE_URL, cmd))[:8]
-        logger.info(f'{short_id} Running command')
-        logger.debug(f'{short_id} Calling wrapped function')
+
+        logger.info(f'Running command')
+        logger.debug(f'Calling wrapped function')
         result = func(*args, **kwargs)
-        logger.debug(f'{short_id} Wrapped function returned')
+        logger.debug(f'Wrapped function returned')
 
         r = os.system(cmd)
         
         if r != 0:
-            logger.error('{short_id} Command returned {}, a {}'.format(r, type(r)))
+            logger.error('Command returned {}, a {}'.format(r, type(r)))
             # raise RuntimeError("command <{}> returned {}, a {}".format(cmd, r, type(r)))
 
-        logger.debug(f'{short_id} Command executed successfully')
+        logger.debug(f'Command executed successfully')
 
         return result
     return wrapper

@@ -9,8 +9,8 @@ pudir=parsl_utils #$(dirname $0)
 cp parsl_utils/kill.sh ./
 
 # Clear logs
-mkdir -p logs
-rm -rf logs/*
+rm -rf logs/
+mkdir -p logs/data_provider
 
 # replace the executors file if an override exists
 if [ -f "executors.override.json" ];then

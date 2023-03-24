@@ -86,12 +86,11 @@ for exec_label, exec_conf_i in exec_conf.items():
     )
 
     # Data provider:
-    # Commands run in worker nodes
-    #    -> rsync commands needs to use the internal IP of the controller node as jump host to reach usercontainer 
+    # One instance per executor
     storage_access = [ 
-        PWRSyncStaging(),
-        PWGsutil(),
-        PWS3()
+        PWRSyncStaging(exec_label),
+        PWGsutil(exec_label),
+        PWS3(exec_label)
     ]
 
     # Define provider

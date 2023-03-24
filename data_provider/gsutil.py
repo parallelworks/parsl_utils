@@ -26,20 +26,18 @@ class PWGsutil(pwstaging.PWStaging):
     are already authenticated.
     """
 
-    def __init__(self):
-        super().__init__('gs')
+    def __init__(self, executor_label):
+        super().__init__('gs', executor_label)
 
     def replace_task(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_cmd(origin = file.url, destination = file.local_path)
-        short_id = str(uuid.uuid3(uuid.NAMESPACE_URL, cmd))[:8]
-        self.logger.info(f'{short_id} Replacing task for command <{cmd}>')
-        return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd, self.logger)
+        task_logger = self._set_task_logger(cmd)    
+        return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd, task_logger)
 
     def replace_task_stage_out(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_cmd(origin = file.local_path, destination = file.url)
-        short_id = str(uuid.uuid3(uuid.NAMESPACE_URL, cmd))[:8]
-        self.logger.info(f'{short_id} Replacing task for command <{cmd}>')
-        return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd, self.logger)
+        task_logger = self._set_task_logger(cmd)    
+        return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd, task_logger)
 
