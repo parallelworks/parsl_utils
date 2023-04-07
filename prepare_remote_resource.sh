@@ -89,4 +89,4 @@ echo HOSTNAME: $HOSTNAME
 echo 
 
 # ESTABLISH TUNNELS
-screen -d -L -m ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -L 0.0.0.0:${WORKER_PORT_1}:localhost:${WORKER_PORT_1} -L 0.0.0.0:${WORKER_PORT_2}:localhost:${WORKER_PORT_2} ${USER_CONTAINER_HOST} 2>&1
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -fN -L 0.0.0.0:${WORKER_PORT_1}:localhost:${WORKER_PORT_1} -L 0.0.0.0:${WORKER_PORT_2}:localhost:${WORKER_PORT_2} ${USER_CONTAINER_HOST} 2>&1
