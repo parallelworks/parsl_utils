@@ -77,7 +77,7 @@ for exec_label, exec_conf_i in exec_conf.items():
 
     # Define worker init:
     # - export PYTHONPATH={run_dir} is needed to use custom staging providers
-    worker_init = 'export PYTHONPATH={run_dir}; \{ bash {workdir}/pw/remote.sh; \} || \{ bash {workdir}/pw/.pw/remote.sh; \} ; source {conda_sh}; conda activate {conda_env}; cd {run_dir}; {clean_cmd}'.format(
+    worker_init = 'export PYTHONPATH={run_dir}; bash {workdir}/pw/remote.sh; bash {workdir}/pw/.pw/remote.sh; source {conda_sh}; conda activate {conda_env}; cd {run_dir}; {clean_cmd}'.format(
         workdir = exec_conf_i['WORKDIR'],
         conda_sh = os.path.join(exec_conf_i['CONDA_DIR'], 'etc/profile.d/conda.sh'),
         conda_env = exec_conf_i['CONDA_ENV'],
