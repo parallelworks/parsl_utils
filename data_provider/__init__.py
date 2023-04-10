@@ -6,11 +6,13 @@ from . import gsutil
 from . import s3
 
 def PWFile(url, local_path):
-    if os.path.isabs(url) or '://' in url:
+    if '://' in url:
         f = File(url + '#' + local_path)
+    elif os.path.isabs(url):
+        f = File('file://usercontainer' + url + '#' + local_path)
     else:
         f = File(
-            os.path.join(
+            'file://usercontainer' + os.path.join(
                 os.getcwd(),
                 url
             ) + '#' + local_path
