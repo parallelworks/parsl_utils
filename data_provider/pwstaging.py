@@ -108,7 +108,7 @@ def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, cmd_id, log_level
         if local_path_dir:
             os.makedirs(local_path_dir, exist_ok=True)
 
-        r = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        r = subprocess.run(cmd, shell=True, check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         if r.returncode != 0:
             logger.error('Command returned {}, a {}'.format(r, type(r)))
@@ -132,7 +132,7 @@ def in_task_stage_out_cmd_wrapper(func, file, working_dir, cmd, cmd_id, log_leve
         result = func(*args, **kwargs)
         logger.debug('Wrapped function returned')
 
-        r = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        r = subprocess.run(cmd, shell=True, check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         if r.returncode != 0:
             logger.error('Command returned {}, a {}'.format(r, type(r)))
