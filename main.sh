@@ -88,7 +88,13 @@ bash ${pudir}/prepare_resources.sh ${job_number} &> logs/prepare_resources.out
 ###############################
 # CREATE MONITORING HTML FILE #
 ###############################
-sed "s/__JOBNUM__/${job_number}/g" ${pudir}/service.html.template > service.html
+number_of_executors=$(cat executors.json | jq 'keys | length')
+if [ ${number_of_executors} -eq 1 ]; then
+    sed "s/__JOBNUM__/${job_number}/g" ${pudir}/service.html.template > service.html
+else
+    echo "Parsl is monitoring not currently supported for more than one executor"
+fi
+
 
 ####################
 # SUBMIT PARSL JOB #
