@@ -1,6 +1,7 @@
 import os
 import uuid
 import logging
+import subprocess
 
 from parsl.utils import RepresentationMixin
 from parsl.data_provider.staging import Staging
@@ -107,9 +108,11 @@ def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, cmd_id, log_level
         if local_path_dir:
             os.makedirs(local_path_dir, exist_ok=True)
 
-        r = os.system(cmd)
-        if r != 0:
+        r = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+        if r.returncode != 0:
             logger.error('Command returned {}, a {}'.format(r, type(r)))
+            logger.error(r.stdout.decode("utf-8"))
             #raise RuntimeError("command {} returned {}, a {}".format(cmd, r, type(r)))
 
         logger.debug('Command executed successfully')
@@ -129,10 +132,11 @@ def in_task_stage_out_cmd_wrapper(func, file, working_dir, cmd, cmd_id, log_leve
         result = func(*args, **kwargs)
         logger.debug('Wrapped function returned')
 
-        r = os.system(cmd)
-        
-        if r != 0:
+        r = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+        if r.returncode != 0:
             logger.error('Command returned {}, a {}'.format(r, type(r)))
+            logger.error(r.stdout.decode("utf-8"))
             # raise RuntimeError("command <{}> returned {}, a {}".format(cmd, r, type(r)))
 
         logger.debug('Command executed successfully')
