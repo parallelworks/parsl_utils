@@ -92,7 +92,7 @@ number_of_executors=$(cat executors.json | jq 'keys | length')
 if [ ${number_of_executors} -eq 1 ]; then
     sed "s/__JOBNUM__/${job_number}/g" ${pudir}/service.html.template > service.html
 else
-    echo "Parsl is monitoring not currently supported for more than one executor"
+    echo "Parsl monitoring is not currently supported for more than one executor"
 fi
 
 
