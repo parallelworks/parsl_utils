@@ -70,4 +70,4 @@ class PWRSyncStaging(pwstaging.PWStaging):
         working_dir = dm.dfk.executors[executor].working_dir
         cmd = get_stage_out_cmd(file, jumphost = dm.dfk.executors[executor].address)
         cmd_id = self._get_cmd_id(cmd)  
-        return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd, cmd_id, self.logger.getEffectiveLevel())
+        return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd, cmd_id, self.logger.getEffectiveLevel())
