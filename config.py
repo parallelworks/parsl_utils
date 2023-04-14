@@ -16,17 +16,14 @@ from parsl_utils.data_provider.rsync import PWRSyncStaging
 from parsl_utils.data_provider.gsutil import PWGsutil
 from parsl_utils.data_provider.s3 import PWS3
 
-
 def read_args():
-    parser=argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()
     parsed, unknown = parser.parse_known_args()
     for arg in unknown:
         if arg.startswith(("-", "--")):
-            parser.add_argument(arg)
-    pwargs=vars(parser.parse_args())
-    print(pwargs)
+            parser.add_argument(arg, default="", nargs="?")
+    pwargs = vars(parser.parse_args())
     return pwargs
-
 
 pwargs = read_args()
 
