@@ -120,6 +120,8 @@ for exec_label, exec_conf_i in exec_conf.items():
 
     if 'cores_per_worker' in exec_conf_i:
         cores_per_worker = float(exec_conf_i['cores_per_worker'])
+    elif 'CORES_PER_WORKER' in exec_conf_i:
+        cores_per_worker = float(exec_conf_i['CORES_PER_WORKER'])
     else:
         cores_per_worker = 1.0
 
