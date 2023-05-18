@@ -78,12 +78,12 @@ for exec_label, exec_conf_i in exec_conf.items():
     # cluster login node 22 is forwarded.
     ssh_jump_config='/tmp/.ssh/'+exec_conf_i['POOL']+'.config'
     if os.path.isfile(ssh_jump_config):
-	# There is a jump box. Get localport.
+        # There is a jump box. Get localport.
         file = open(ssh_jump_config, 'r')
         lines = file.readlines()
         for line in lines:
-	    if "Port" in line:
-        	localport=line.split()[1]
+            if "Port" in line:
+                localport=line.split()[1]
 
 	# Adjust Parsl config
         channel.hostname="localhost"
