@@ -2,6 +2,11 @@
 set -x
 date
 
+# Support for kerberos
+if [ -f "/pw/kerberos/source.env" ]; then
+    source /pw/kerberos/source.env
+fi
+
 pudir=parsl_utils #$(dirname $0)
 . ${pudir}/utils.sh
 
