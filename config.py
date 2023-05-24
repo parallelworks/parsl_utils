@@ -55,8 +55,7 @@ for exec_label, exec_conf_i in exec_conf.items():
 
     # To support kerberos:
     import shutil
-    ssh_path = shutil.which('ssh')
-    if 'kerberos' in ssh_path.split('/'):
+    if 'KRB5CCNAME' in os.environ:
         gssapi_auth = True
     else:
         gssapi_auth = False
