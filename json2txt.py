@@ -23,7 +23,7 @@ def json2txt(fjson):
         bash_export = ['LABEL=' + exec_label]
         for eck, ecv in exec_conf.items():
             if type(ecv) == dict:
-                ecv = json.dumps(ecv).replace(' ','')
+                ecv = json.dumps(ecv).replace(' ','___')
 
             bash_export.append(eck + '=' + str(ecv))
         print(' '.join(bash_export))
@@ -35,12 +35,9 @@ def _line2dict(line):
         if 'PBSProProvider' in word:
             key = 'PBSProProvider'
             val = word.replace('PBSProProvider=','')
-        elif 'SlurmProvider' in word:
-            key = 'SlurmProvider'
-            val = word.replace('SlurmProvider=','')
         else:
             key,val = word.split('=')
-        d[key] = val
+        d[key] = val.replace('___',' ')
     return d
 
 
@@ -49,6 +46,8 @@ def txt2json(ftxt):
 
     with open(ftxt) as f:
         for line in f:
+            if not line:
+                continue
             ld = _line2dict(line.rstrip())
             ename = ld['LABEL']
             del ld['LABEL']
