@@ -32,9 +32,15 @@ def json2txt(fjson):
 def _line2dict(line):
     d = {}
     for word in line.split(' '):
-        key,val = word.split('=')
+        if 'PBSProProvider' in word:
+            key = 'PBSProProvider'
+            val = word.replace('PBSProProvider=','')
+        elif 'SlurmProvider' in word:
+            key = 'SlurmProvider'
+            val = word.replace('SlurmProvider=','')
+        else:
+            key,val = word.split('=')
         d[key] = val
-
     return d
 
 
