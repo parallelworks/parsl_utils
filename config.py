@@ -57,7 +57,7 @@ for exec_label, exec_conf_i in exec_conf.items():
     gssapi_auth = False
     if 'GSSAPI_AUTH' in exec_conf_i:
 	if exec_conf_i['GSSAPI_AUTH'] == "true":
-            gssapi_auth = True
+		gssapi_auth = True
 
     channel = SSHChannel(
         hostname = exec_conf_i['HOST_IP'],
