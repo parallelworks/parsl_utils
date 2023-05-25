@@ -100,7 +100,8 @@ else
     echo "Parsl monitoring is not currently supported for more than one executor"
 fi
 
-
+sleep 5
+cat executors.json
 ####################
 # SUBMIT PARSL JOB #
 ####################
