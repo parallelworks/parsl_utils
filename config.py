@@ -54,11 +54,10 @@ for exec_label, exec_conf_i in exec_conf.items():
         worker_logdir_root =  exec_conf_i['WORKER_LOGDIR_ROOT']
 
     # To support kerberos:
-    import shutil
-    if 'KRB5CCNAME' in os.environ:
-        gssapi_auth = True
-    else:
-        gssapi_auth = False
+    gssapi_auth = False
+    if 'GSSAPI_AUTH' in exec_conf_i:
+	if exec_conf_i['GSSAPI_AUTH'] == "true":
+            gssapi_auth = True
 
     channel = SSHChannel(
         hostname = exec_conf_i['HOST_IP'],
