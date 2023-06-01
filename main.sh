@@ -108,7 +108,7 @@ cat executors.json
 wfargs=$(echo ${wfargs} | sed "s|__PW_USER__|${PW_USER}|g")
 echo; echo; echo
 echo "RUNNING PARSL JOB"
-echo "python -u main.py ${wfargs}"
+echo "python3 -u main.py ${wfargs}"
 # To track and cancel the job
 python3 -u main.py ${wfargs}
 ec=$?
