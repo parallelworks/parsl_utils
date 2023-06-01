@@ -110,7 +110,7 @@ echo; echo; echo
 echo "RUNNING PARSL JOB"
 echo "python -u main.py ${wfargs}"
 # To track and cancel the job
-python -u main.py ${wfargs}
+python3 -u main.py ${wfargs}
 ec=$?
 main_pid=$!
 echo; echo; echo
