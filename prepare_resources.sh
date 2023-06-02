@@ -120,7 +120,7 @@ while IFS= read -r exec_conf; do
     fi
     exec_conf="${exec_conf} ADDRESS=${ADDRESS}"
 
-    echo ${exec_conf} | sed "s|__POOLWORKDIR__|${WORKDIR}|g" | sed "s|__USER__|${PW_USER}|g"  >> exec_conf_completed.export
+    echo ${exec_conf} | sed "s|__POOLWORKDIR__|${WORKDIR}|g" | sed "s|__USER__|${PW_USER}|g" | sed "s|__RUN_DIR__|${RUN_DIR}|g"  >> exec_conf_completed.export
     unset HOST_IP WORKER_PORT_2 WORKER_PORT_1 HOST_USER RUN_DIR
 
 done <  exec_conf.export
