@@ -41,6 +41,7 @@ if ! [ -z "${PARSL_UTILS_DIR}" ]; then
 fi
 if ! [ -z "${WORKFLOW_APPS_PY}" ]; then
     scp ${USER_CONTAINER_HOST}:${WORKFLOW_APPS_PY} ${RUN_DIR}/workflow_apps.py
+    scp ${USER_CONTAINER_HOST}:/pw/jobs/${job_number}/executors.json ${RUN_DIR}/executors.json
 fi
 
 f_install_miniconda() {
