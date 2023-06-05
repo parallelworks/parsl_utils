@@ -65,7 +65,7 @@ for exec_label, exec_conf_i in exec_conf.items():
         # Full path to a script dir where generated scripts could be sent to
         script_dir = script_dir,
             key_filename = '/home/{PW_USER}/.ssh/pw_id_rsa'.format(
-            PW_USER = os.environ['PW_USER']
+            PW_USER =  exec_conf_i['HOST_USER']
         ),
         gssapi_auth = gssapi_auth
     )
