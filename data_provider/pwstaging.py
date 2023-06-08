@@ -34,7 +34,7 @@ def url_to_local_path(file):
     
     return file
 
-def add_working_dir_to_local_path(file, dm, executor):
+def add_missing_local_path(file, dm, executor):
     """
     Adds the executor's workdir as defined in the parsl config file to
     the file's local path
@@ -43,13 +43,6 @@ def add_working_dir_to_local_path(file, dm, executor):
     """
     if file.local_path is None:
         file.local_path = file.filename
-    elif not os.path.isabs(file.local_path):
-        working_dir = dm.dfk.executors[executor].working_dir
-        if working_dir:
-            file.local_path = os.path.join(working_dir, file.local_path)
-        else:
-            file.local_path = file.filename
-    
     return file
     
 
@@ -82,12 +75,12 @@ class PWStaging(Staging, RepresentationMixin):
 
     def stage_in(self, dm, executor, file, parent_fut):
         file = url_to_local_path(file)
-        file = add_working_dir_to_local_path(file, dm, executor)        
+        file = add_missing_local_path(file, dm, executor)        
         return None
 
     def stage_out(self, dm, executor, file, parent_fut):
         file = url_to_local_path(file)
-        file = add_working_dir_to_local_path(file, dm, executor)        
+        file = add_missing_local_path(file, dm, executor)        
         return None
     
     def replace_task(self, dm, executor, file, f):
