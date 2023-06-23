@@ -1,48 +1,28 @@
-#!/bin/bash
+
 set -e
+findAvailablePort() {
+    # Find an available availablePort
+    minPort=6000
+    maxPort=9000
+    for port in $(seq ${minPort} ${maxPort} | shuf); do
+        out=$(netstat -aln | grep LISTEN | grep \${port})
+        if [ -z "${out}" ]; then
+            # To prevent multiple users from using the same available port --> Write file to reserve it
+            portFile=/tmp/${port}.port.used
+            if ! [ -f "${portFile}" ]; then
+                touch ${portFile}
+                availablePort=${port}
+                echo ${availablePort}
+                break
+            fi
+        fi
+    done
 
-# Runs in the remote resource before running parsl
-job_number=__job_number__
-
-INSTALL_CONDA=__INSTALL_CONDA__
-CONDA_DIR=__CONDA_DIR__
-CONDA_ENV=__CONDA_ENV__
-PW_CONDA_YAML=__LOCAL_CONDA_YAML__
-
-CREATE_SINGULARITY_CONTAINER=__CREATE_SINGULARITY_CONTAINER__
-SINGULARITY_CONTAINER_PATH=__SINGULARITY_CONTAINER_PATH__
-PW_SINGULARITY_FILE=__LOCAL_SINGULARITY_FILE__
-
-WORKER_PORT_1=__WORKER_PORT_1__
-WORKER_PORT_2=__WORKER_PORT_2__
-
-RUN_DIR=__RUN_DIR__
-PARSL_UTILS_DIR=__PARSL_UTILS_DIR__
-WORKFLOW_APPS_PY=__WORKFLOW_APPS_PY__
-
-
-
-# WONT WORK IN EINSTEINMED:
-USER_CONTAINER_HOST="usercontainer"
-
-mkdir -p ${RUN_DIR}
-
-# PRINT SCHEDULER TYPE (Needed to clean jobs)
-# FIXME: This info should be included in the resource definition page
-if ! [ -z $(which sbatch 2> /dev/null) ]; then
-    echo "SCHEDULER_TYPE=SLURM"
-elif ! [ -z $(which qsub 2> /dev/null) ]; then
-    echo "SCHEDULER_TYPE=PBS"
-fi
-
-# COPY REQUIRED FILES FROM PW
-if ! [ -z "${PARSL_UTILS_DIR}" ]; then
-    rsync -avzq ${USER_CONTAINER_HOST}:${PARSL_UTILS_DIR} ${RUN_DIR}/
-fi
-if ! [ -z "${WORKFLOW_APPS_PY}" ]; then
-    scp ${USER_CONTAINER_HOST}:${WORKFLOW_APPS_PY} ${RUN_DIR}/workflow_apps.py
-    scp ${USER_CONTAINER_HOST}:/pw/jobs/${job_number}/executors.json ${RUN_DIR}/executors.json
-fi
+    if [ -z "${availablePort}" ]; then
+        echo "ERROR: No service port found in the range ${minPort}-${maxPort}"s
+        exit 1
+    fi
+}
 
 f_install_miniconda() {
     install_dir=$1
@@ -55,39 +35,53 @@ f_install_miniconda() {
     nohup bash /tmp/miniconda-${ID}.sh -b -p ${install_dir} 2>&1 > /tmp/miniconda_sh-${ID}.out
 }
 
-# INSTALL CONDA REQUIREMENTS
-if [[ ${INSTALL_CONDA} == "true" ]]; then
-    CONDA_YAML=${RUN_DIR}/$(basename ${PW_CONDA_YAML})
-    scp usercontainer:${PW_CONDA_YAML} ${CONDA_YAML}
-    CONDA_SH="${CONDA_DIR}/etc/profile.d/conda.sh"
-    # conda env export
-    # Remove line starting with name, prefix and remove empty lines
-    sed -i -e 's/name.*$//' -e 's/prefix.*$//' -e '/^$/d' ${CONDA_YAML}
-
-    # Check if miniconda is installed
-    {
-        source ${CONDA_SH}
-    } || {
-        f_install_miniconda ${CONDA_DIR}
-        source ${CONDA_SH}
-    }
-    # Make sure conda environment meets requirements:
-    conda env update -n ${CONDA_ENV} -f ${CONDA_YAML} #--prune
-fi
-
-# CREATE SINGULARITY CONTAINER
-if [[ ${CREATE_SINGULARITY_CONTAINER} == "true" ]]; then
-    if ! [ -f "${SINGULARITY_CONTAINER_PATH}" ]; then
-        mkdir -p $(dirname ${SINGULARITY_CONTAINER_PATH})
-        SINGULARITY_FILE=${RUN_DIR}/$(basename ${PWDA_YAML})
-        scp usercontainer:${PW_SINGULARITY_FILE} ${SINGULARITY_FILE}
-        sudo singularity build ${SINGULARITY_CONTAINER_PATH} ${SINGULARITY_FILE}
-    fi
-fi
-
 echo 
 echo HOSTNAME: $HOSTNAME
 echo 
 
+USER_CONTAINER_HOST="usercontainer"
+PW_JOB_DIR=$(echo ${resource_jobdir} | sed 's/.*\(\/pw\/.*\)/\1/')
+PARSL_UTILS_DIR=${PW_JOB_DIR}/parsl_utils
+WORKFLOW_APPS_PY=${PW_JOB_DIR}/workflow_apps.py
+
+mkdir -p ${resource_jobdir}
+
+# COPY REQUIRED FILES FROM PW
+# - These are required for parsl to start, therefore, parsl cannot transfer them
+if ! [ -z "${PARSL_UTILS_DIR}" ]; then
+    rsync -avzq ${USER_CONTAINER_HOST}:${PARSL_UTILS_DIR} ${resource_jobdir}
+fi
+if ! [ -z "${WORKFLOW_APPS_PY}" ]; then
+    scp ${USER_CONTAINER_HOST}:${WORKFLOW_APPS_PY} ${resource_jobdir}/workflow_apps.py
+fi
+
+if ! [ -z "${worker_conda_yaml}" ]; then
+    # Ensure path is absolute
+    if ! [[ ${worker_conda_yaml} == /* ]]; then
+        worker_conda_yaml="${PW_JOB_DIR}/${worker_conda_yaml}"
+    fi
+    # Path to worker_conda_yaml on the controller node
+    WORKER_CONDA_YAML="${resource_jobdir}/${RANDOM}-$(basename ${worker_conda_yaml})"
+    scp ${USER_CONTAINER_HOST}:${worker_conda_yaml} ${WORKER_CONDA_YAML}
+fi
+
+
+# SET UP WORKER CONDA FROM YAML
+f_set_up_conda_from_yaml ${worker_conda_dir} ${worker_conda_env} ${WORKER_CONDA_YAML}
+
+
 # ESTABLISH TUNNELS
-ssh -vvv -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -fN -L 0.0.0.0:${WORKER_PORT_1}:localhost:${WORKER_PORT_1} -L 0.0.0.0:${WORKER_PORT_2}:localhost:${WORKER_PORT_2} ${USER_CONTAINER_HOST} &> ~/.ssh/parsl_utils.ssh.tunnel.log
+PW_WORKER_PORT_1=$(echo ${resource_ports} | sed "s/___/,/g" | cut -d',' -f1)
+PW_WORKER_PORT_2=$(echo ${resource_ports} | sed "s/___/,/g" | cut -d',' -f2)
+if [ -z "${PW_WORKER_PORT_1}" ] || [ -z "${PW_WORKER_PORT_2}" ]; then
+    echo "ERROR: Could not read PW worker ports <${PW_WORKER_PORT_1}> or <${PW_WORKER_PORT_2}> from resource ports <${resource_ports}>"
+    exit 1
+fi
+HOST_WORKER_PORT_1=$(findAvailablePort)
+HOST_WORKER_PORT_2=$(findAvailablePort)
+ssh -vvv -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -fN \
+    -L 0.0.0.0:${PW_WORKER_PORT_1}:localhost:${HOST_WORKER_PORT_1} \
+    -L 0.0.0.0:${PW_WORKER_PORT_2}:localhost:${HOST_WORKER_PORT_2} \
+    ${USER_CONTAINER_HOST} &> ~/.ssh/parsl_utils.ssh.tunnel.log
+
+echo Done!

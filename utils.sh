@@ -1,56 +1,6 @@
 #!/bin/bash
 
-ssh_options="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
-
-is_in_list () {
-    list=$1
-    x=$2
-    [[ $list =~ (^|[[:space:]])$x($|[[:space:]]) ]] && echo true || echo false
-}
-
-find_available_port_pair () {
-    port_1=55233
-    port_2=$((port_1+1))
-
-    # WARNING: Tunnel ports only shows up in netstat after running the parsl app. Otherwise they only show up on the head node.
-    used_ports=$(netstat -tulpn | grep LISTEN | awk '{print $4}' | rev |cut -d':' -f1 | rev)
-
-    while true; do
-
-        if $(is_in_list "${used_ports}" ${port_1}) || $(is_in_list "${used_ports}" ${port_2}); then
-            port_1=$((port_1+1))
-            port_2=$((port_1+1))
-        else
-            echo ${port_1} ${port_2}
-            break
-        fi
-    done
-}
-
-
-
-# Exports inputs in the format
-# --a 1 --b 2 --c 3
-# to:
-# export a=1 b=2 c=3
-f_read_cmd_args(){
-    index=1
-    args=""
-    for arg in $@; do
-	    prefix=$(echo "${arg}" | cut -c1-2)
-	    if [[ ${prefix} == '--' ]]; then
-	        pname=$(echo $@ | cut -d ' ' -f${index} | sed 's/--//g')
-	        pval=$(echo $@ | cut -d ' ' -f$((index + 1)))
-		    # To support empty inputs (--a 1 --b --c 3)
-		    if [ ${pval:0:2} != "--" ]; then
-	            echo "export ${pname}=${pval}" >> $(dirname $0)/env.sh
-	            export "${pname}=${pval}"
-		    fi
-	    fi
-        index=$((index+1))
-    done
-}
-
+export SSH_OPTIONS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 
 # get a unique open port
 # - try end point
@@ -89,10 +39,6 @@ export_runinfo_dir() {
     fi
 }
 
-export_scheduler_type_from_resource_logs() {
-    JOB_SCHEDULER_TYPE=$(cat ${LABEL}/prepare_remote_resource.out | grep SCHEDULER_TYPE | cut -d'=' -f2)
-    export JOB_SCHEDULER_TYPE=${JOB_SCHEDULER_TYPE}
-}
 
 # GET SLURM JOB NAMES
 # FIXME: Need to test PBS + SLURM jobs!
