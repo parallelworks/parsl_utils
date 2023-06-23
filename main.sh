@@ -17,7 +17,8 @@ rm -rf ${PARSL_LOGS}
 mkdir -p ${PARSL_LOGS}
 
 # Create kill script
-cat ${PU_DIR}/clean_resources.sh > kill.sh
+echo "export PU_DIR=parsl_utils" > kill.sh
+cat ${PU_DIR}/clean_resources.sh >> kill.sh
 chmod +x kill.sh
 
 echo; echo; echo "PREPARING USER WORKSPACE"
