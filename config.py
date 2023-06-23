@@ -102,7 +102,6 @@ for label in resource_labels:
 
     # Define provider
     provider_options = get_provider_parameters_from_form(resource_inputs)
-    
     if resource_inputs['jobschedulertype'] == 'PBS':
         provider = PBSProProvider(
             **provider_options,
@@ -110,7 +109,10 @@ for label in resource_labels:
             channel = channel
         )
 
-    elif resource_inputs['jobschedulertype'] = 'SLURM':
+    elif resource_inputs['jobschedulertype'] == 'SLURM':
+        if 'init_blocks' not in provider_options:
+            provider_options['init_blocks'] = 0
+
         provider = SlurmProvider(
             **provider_options,
             worker_init = worker_init,
