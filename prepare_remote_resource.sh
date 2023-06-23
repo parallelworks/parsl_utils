@@ -1,28 +1,5 @@
 
 set -e
-findAvailablePort() {
-    # Find an available availablePort
-    minPort=6000
-    maxPort=9000
-    for port in $(seq ${minPort} ${maxPort} | shuf); do
-        out=$(netstat -aln | grep LISTEN | grep \${port})
-        if [ -z "${out}" ]; then
-            # To prevent multiple users from using the same available port --> Write file to reserve it
-            portFile=/tmp/${port}.port.used
-            if ! [ -f "${portFile}" ]; then
-                touch ${portFile}
-                availablePort=${port}
-                echo ${availablePort}
-                break
-            fi
-        fi
-    done
-
-    if [ -z "${availablePort}" ]; then
-        echo "ERROR: No service port found in the range ${minPort}-${maxPort}"s
-        exit 1
-    fi
-}
 
 f_install_miniconda() {
     install_dir=$1
@@ -77,11 +54,11 @@ if [ -z "${PW_WORKER_PORT_1}" ] || [ -z "${PW_WORKER_PORT_2}" ]; then
     echo "ERROR: Could not read PW worker ports <${PW_WORKER_PORT_1}> or <${PW_WORKER_PORT_2}> from resource ports <${resource_ports}>"
     exit 1
 fi
-HOST_WORKER_PORT_1=$(findAvailablePort)
-HOST_WORKER_PORT_2=$(findAvailablePort)
+
+# User ports don't work!
 ssh -vvv -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -fN \
-    -L 0.0.0.0:${PW_WORKER_PORT_1}:localhost:${HOST_WORKER_PORT_1} \
-    -L 0.0.0.0:${PW_WORKER_PORT_2}:localhost:${HOST_WORKER_PORT_2} \
+    -L 0.0.0.0:${PW_WORKER_PORT_1}:localhost:${PW_WORKER_PORT_1} \
+    -L 0.0.0.0:${PW_WORKER_PORT_2}:localhost:${PW_WORKER_PORT_1} \
     ${USER_CONTAINER_HOST} &> ~/.ssh/parsl_utils.ssh.tunnel.log
 
 echo Done!
