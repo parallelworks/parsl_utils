@@ -58,7 +58,7 @@ fi
 # User ports don't work!
 ssh -vvv -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -fN \
     -L 0.0.0.0:${PW_WORKER_PORT_1}:localhost:${PW_WORKER_PORT_1} \
-    -L 0.0.0.0:${PW_WORKER_PORT_2}:localhost:${PW_WORKER_PORT_1} \
+    -L 0.0.0.0:${PW_WORKER_PORT_2}:localhost:${PW_WORKER_PORT_2} \
     ${USER_CONTAINER_HOST} &> ~/.ssh/parsl_utils.ssh.tunnel.log
 
 echo Done!

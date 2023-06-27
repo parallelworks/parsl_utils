@@ -2,7 +2,7 @@
 echo; echo; echo "CLEANING REMOTE RESOURCES"
 source ${PU_DIR}/utils.sh
 export_runinfo_dir
-export_job_name
+export_job_names
 resource_labels=$(ls -d  resources/*/ | tr ' ' '\n' | sed "s|resources/||g" | sed "s|/||g")
 for label in ${resource_labels}; do
     echo; echo "CLEANING RESOURCE ${label}"
