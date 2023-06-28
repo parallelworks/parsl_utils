@@ -49,7 +49,7 @@ resource_labels = [label.replace('pwrl_','') for label in form_inputs.keys() if 
 # Need to name the job to be able to remove it with clean_resources.sh!
 job_name = '-'.join(os.getcwd().split('/')[-2:])
 
-# Usefulfor workflows accessing information about the resources
+# Usefulfor workflows accessing information about the resources, e.g.: jobdir
 executor_dict = {}
 
 # Define HighThroughputExecutors
