@@ -54,7 +54,8 @@ bash ${PU_DIR}/prepare_resources.sh
 # - Only supported for a single executor
 number_of_executors=$(ls -d  resources/*/ | tr ' ' '\n' | sed "s|resources/||g" | sed "s|/||g" | wc -l)
 if [ ${number_of_executors} -eq 1 ]; then
-    sed "s/__JOBNUM__/${job_number}/g" ${pudir}/service.html.template > service.html
+    html_job_id=$(pwd | rev | cut -d'/' -f1-2 | rev)
+    sed "s/__JOBID__/${html_job_id}/g" ${PU_DIR}/service.html.template > service.html
 else
     echo "Parsl monitoring is not currently supported for more than one executor"
 fi
