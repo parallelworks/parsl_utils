@@ -39,6 +39,8 @@ def get_provider_parameters_from_form(resource_inputs):
 
     return provider_options
 
+# job_name = workflow_name + job number
+job_name = '-'.join(os.getcwd().split('/')[-2:])
 
 # Find all resource labels
 with open('inputs.json') as inputs_json:
