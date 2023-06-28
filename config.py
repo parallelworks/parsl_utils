@@ -49,7 +49,7 @@ for label in resource_labels:
     # To support kerberos:
     gssapi_auth = False
     if 'gssapi_auth' in resource_inputs:
-        if resource_inputs['gssapi_auth'] == "true":
+        if resource_inputs['gssapi_auth'].lower() == "true":
             gssapi_auth = True
 
     hostname = resource_inputs['resource']['publicIp']
