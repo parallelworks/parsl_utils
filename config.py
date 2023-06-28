@@ -8,8 +8,6 @@ from parsl.addresses import address_by_hostname
 
 import os
 import json
-import argparse
-import shutil
 
 import parsl_utils
 from parsl_utils.data_provider.rsync import PWRSyncStaging
@@ -17,12 +15,27 @@ from parsl_utils.data_provider.gsutil import PWGsutil
 from parsl_utils.data_provider.s3 import PWS3
 
 
+def guess_correct_type(v):
+    if type(v) is not str:
+        return v
+    
+    try:
+        result = int(v)
+        return result
+    except ValueError:
+        try:
+            result = float(v)
+            return result
+        except ValueError:
+            return v
+
+
 def get_provider_parameters_from_form(resource_inputs):
     provider_options = {}
     for k,v in resource_inputs.items():
         if k.startswith('_parsl_provider_'):
             key = k.replace('_parsl_provider_', '')
-            provider_options[key] = v
+            provider_options[key] = guess_correct_type(v)
 
     return provider_options
 
