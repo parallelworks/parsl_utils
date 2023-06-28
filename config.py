@@ -19,7 +19,7 @@ from parsl_utils.data_provider.s3 import PWS3
 
 def get_provider_parameters_from_form(resource_inputs):
     provider_options = {}
-    for k,v in inputs_dict.items():
+    for k,v in resource_inputs.items():
         if k.startswith('_parsl_provider_'):
             key = k.replace('_parsl_provider_', '')
             provider_options[key] = v
@@ -29,9 +29,9 @@ def get_provider_parameters_from_form(resource_inputs):
 
 # Find all resource labels
 with open('inputs.json') as inputs_json:
-    inputs_dict = json.load(inputs_json)
+    form_inputs = json.load(inputs_json)
         
-resource_labels = [label.replace('pwrl_','') for label in inputs_dict.keys() if label.startswith('pwrl_')]    
+resource_labels = [label.replace('pwrl_','') for label in form_inputs.keys() if label.startswith('pwrl_')]    
 
 # Need to name the job to be able to remove it with clean_resources.sh!
 job_name = '-'.join(os.getcwd().split('/')[-2:])
@@ -155,8 +155,8 @@ for label in resource_labels:
         )
     )
     
-if 'parsl_retries' in inputs_dict:
-    retries = int(inputs_dict['parsl_retries'])
+if 'parsl_retries' in form_inputs:
+    retries = int(form_inputs['parsl_retries'])
     from . import retry_handler
     retry_handler = retry_handler.retry_handler
 else:
