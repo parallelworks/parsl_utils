@@ -49,12 +49,17 @@ resource_labels = [label.replace('pwrl_','') for label in form_inputs.keys() if 
 # Need to name the job to be able to remove it with clean_resources.sh!
 job_name = '-'.join(os.getcwd().split('/')[-2:])
 
+# Usefulfor workflows accessing information about the resources
+executor_dict = {}
+
 # Define HighThroughputExecutors
 executors = []
 for label in resource_labels:
     resource_inputs_json = os.path.join('resources', label, 'inputs.json')
     with open(resource_inputs_json) as inputs_json:
         resource_inputs = json.load(inputs_json)
+
+    executor_dict[label] = resource_inputs
     
     script_dir = os.path.join(resource_inputs['resource']['jobdir'], 'ssh_channel_script_dir')
     worker_logdir_root = os.path.join(resource_inputs['resource']['jobdir'], 'worker_logdir_root')
