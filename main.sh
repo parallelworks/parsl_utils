@@ -56,6 +56,7 @@ number_of_executors=$(ls -d  resources/*/ | tr ' ' '\n' | sed "s|resources/||g" 
 if [ ${number_of_executors} -eq 1 ]; then
     html_job_id=$(pwd | rev | cut -d'/' -f1-2 | rev)
     sed "s|__JOBID__|${html_job_id}|g" ${PU_DIR}/service.html.template > service.html
+    cp  ${PU_DIR}/service.json .
 else
     echo "Parsl monitoring is not currently supported for more than one executor"
 fi
