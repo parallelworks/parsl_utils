@@ -1,127 +1,73 @@
 #!/bin/bash
-set -x
 date
+
+source /etc/profile.d/parallelworks.sh
+source /etc/profile.d/parallelworks-env.sh
+source /pw/.miniconda3/etc/profile.d/conda.sh
+conda activate
+
+python /swift-pw-bin/utils/input_form_resource_wrapper.py
+
+source inputs.sh
+export PU_DIR=parsl_utils #$(dirname $0)
+source ${PU_DIR}/utils.sh
+source ${PU_DIR}/set_up_conda_from_yaml.sh
 
 # Support for kerberos
 if [ -f "/pw/kerberos/source.env" ]; then
     source /pw/kerberos/source.env
 fi
 
-pudir=parsl_utils #$(dirname $0)
-. ${pudir}/utils.sh
-
-# Copy the kill file
-cp parsl_utils/kill.sh ./
-
 # Clear logs
-rm -rf logs/
-mkdir -p logs/
+export PARSL_LOGS=parsl_logs
+rm -rf ${PARSL_LOGS}
+mkdir -p ${PARSL_LOGS}
 
-# replace the executors file if an override exists
-if [ -f "executors.override.json" ];then
-    cp executors.override.json executors.json
-fi
+# Create kill script
+echo "export PU_DIR=parsl_utils" > kill.sh
+cat ${PU_DIR}/clean_resources.sh >> kill.sh
+chmod +x kill.sh
 
-# check if executors file exists
-if [ ! -f executors.json ]; then
-    echo "ERROR: File executors.json is missing; workflow does not know where to run!"
-    echo "This missing file should have at least the following information for at"
-    echo "least one executor (multiple executors are optional):" 
-    echo "{"
-    echo "  \"myexecutor_1\": {"
-    echo "    \"POOL\": \"<pw_resource_name>\","
-    echo "    \"PROVIDER_TYPE\": \"LOCAL\","
-    echo "    \"CONDA_ENV\": \"<conda_env_name>\","
-    echo "    \"CONDA_DIR\": \"__POOLWORKDIR__/pw/.miniconda3\","
-    echo "    \"CORES_PER_WORKER\": <integer_or_fractional_number_cores>,"
-    echo "    \"INSTALL_CONDA\": \"<true|false>\","
-    echo "    \"LOCAL_CONDA_YAML\": \"./requirements/conda_env_remote.yaml\","
-    echo "    \"SlurmProvider\": {"
-    echo "      \"partition\": \"<partition_name>\","
-    echo "      \"nodes_per_block\": <integer>,"
-    echo "      \"cores_per_node\": <integer>,"
-    echo "      \"min_blocks\": <integer>,"
-    echo "      \"max_blocks\": <integer>,"
-    echo "      \"walltime\": \"01:00:00\""
-    echo "    }"
-    echo "  },"
-    echo "  \"myexecutor_2\": {...},"
-    echo "  ..."
-    echo "}"
-    echo "The \"SlurmProvider\" section is ommitted if the executor is not a SLURM cluster."
-    exit 1
-fi
-
-# Use a job_number to:
-# 1. Track / cancel job
-# 2. Stage temporary files
-job_number=$(basename ${PWD})   #job-${job_num}_date-$(date +%s)_random-${RANDOM}
-wfargs="$@ --job_number ${job_number}"
-
-# Replace special placeholders:
-wfargs="$(echo ${wfargs} | sed "s|__job_number__|${job_number}|g")"
-sed -i "s|__job_number__|${job_number}|g" executors.json
-sed -i "s|__job_number__|${job_number}|g" kill.sh
-
-#########################################
-# CHECKING AND PREPARING USER CONTAINER #
-#########################################
-# - Install conda requirements in local environment (user container)
+echo; echo; echo "PREPARING USER WORKSPACE"
+# Install conda requirements in local environment (user container)
 # - Different workflows may have different local environments
 # - Shared workflows may be missing their environment
 # - Not required if running a notebook since the kernel would be changed to this environment
-if [ ! -f local.conf ]; then
-    echo "ERROR: Need to specify a local configuration file with at least the following variables:"
-    echo CONDA_DIR=/path/to/conda/
-    echo CONDA_ENV=name-of-conda-environment
+if [ -z "$pw_conda_dir" ] || [ -z "$pw_conda_env" ]; then
+    echo "ERROR: Missing path to PW conda directory <${pw_conda_dir}> or PW conda environment name <${pw_conda_env}>"
+    echo "       pw_conda_dir=/path/to/conda/"
+    echo "       pw_conda_env=name-of-conda-environment"
     exit 1
 fi
 
-source local.conf
-if [[ ${INSTALL_CONDA} == true ]]; then
-    bash ${pudir}/install_conda_requirements.sh ${CONDA_DIR} ${CONDA_ENV} ${LOCAL_CONDA_YAML} &> logs/local_install_conda_requirements.out
-fi
-# Activate or install and activate conda environment in user container
-source ${CONDA_DIR}/etc/profile.d/conda.sh
-conda activate ${CONDA_ENV}
+f_set_up_conda_from_yaml ${pw_conda_dir} ${pw_conda_env} ${pw_conda_yaml}
+source ${pw_conda_dir}/etc/profile.d/conda.sh
+conda activate ${pw_conda_env}
 
-############################################
-# CHECKING AND PREPRARING REMOTE EXECUTORS #
-############################################
-bash ${pudir}/prepare_resources.sh ${job_number} &> logs/prepare_resources.out
+# Required even if empty because it is copied from the prepare_remote_resource.sh script
+touch workflow_apps.py 
 
-###############################
-# CREATE MONITORING HTML FILE #
-###############################
-number_of_executors=$(cat executors.json | jq 'keys | length')
+# PREPARE REMOTE RESOURCES
+bash ${PU_DIR}/prepare_resources.sh
+
+# CREATE MONITORING HTML FILE
+# - Only supported for a single executor
+number_of_executors=$(ls -d  resources/*/ | tr ' ' '\n' | sed "s|resources/||g" | sed "s|/||g" | wc -l)
 if [ ${number_of_executors} -eq 1 ]; then
-    sed "s/__JOBNUM__/${job_number}/g" ${pudir}/service.html.template > service.html
+    html_job_id=$(pwd | rev | cut -d'/' -f1-2 | rev)
+    sed "s|__JOBID__|${html_job_id}|g" ${PU_DIR}/service.html.template > service.html
+    cp  ${PU_DIR}/service.json .
 else
     echo "Parsl monitoring is not currently supported for more than one executor"
 fi
 
-sleep 5
-cat executors.json
-####################
-# SUBMIT PARSL JOB #
-####################
-wfargs=$(echo ${wfargs} | sed "s|__PW_USER__|${PW_USER}|g")
-echo; echo; echo
-echo "RUNNING PARSL JOB"
-echo "python3 -u main.py ${wfargs}"
-# To track and cancel the job
+echo; echo; echo "RUNNING PARSL"
 python3 -u main.py ${wfargs}
 ec=$?
-main_pid=$!
-echo; echo; echo
 
-##########################
-# CLEAN REMOTE EXECUTORS #
-##########################
+# CLEAN REMOTE RESOURCES
 bash kill.sh
 
-##########################
-# Exit                   #
-##########################
 echo Exit code ${ec}
 exit ${ec}
+
