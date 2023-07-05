@@ -6,7 +6,7 @@ source /etc/profile.d/parallelworks-env.sh
 source /pw/.miniconda3/etc/profile.d/conda.sh
 conda activate
 
-python input_form_resource_wrapper.py
+python /swift-pw-bin/utils/input_form_resource_wrapper.py
 
 source inputs.sh
 export PU_DIR=parsl_utils #$(dirname $0)
