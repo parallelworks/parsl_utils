@@ -36,6 +36,8 @@ def get_provider_parameters_from_form(resource_inputs):
         if k.startswith('_parsl_provider_'):
             key = k.replace('_parsl_provider_', '')
             provider_options[key] = guess_correct_type(v)
+            if '__RUN_DIR__' in v:
+                provider_options[key] = v.replace('__RUN_DIR__', resource_inputs['resource']['jobdir'])
 
     return provider_options
 
