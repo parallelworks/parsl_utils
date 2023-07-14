@@ -56,7 +56,6 @@ number_of_executors=$(ls -d  resources/*/ | tr ' ' '\n' | sed "s|resources/||g" 
 if [ ${number_of_executors} -eq 1 ]; then
     job_id=$(pwd | rev | cut -d'/' -f1-2 | rev)
     cp ${PU_DIR}/service.json service.json
-    sed -i "s|__JOBID__|${job_id}|g" service.json
 else
     echo "Parsl monitoring is not currently supported for more than one executor"
 fi
