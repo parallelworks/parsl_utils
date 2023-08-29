@@ -206,6 +206,8 @@ else:
             resource_monitoring_enabled = False,
         )
     )
+	
+print(config)
 
 # ,
 #    monitoring = MonitoringHub(
