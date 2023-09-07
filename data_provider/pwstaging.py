@@ -101,11 +101,13 @@ def in_task_stage_in_cmd_wrapper(func, file, working_dir, cmd, cmd_id, log_level
         if local_path_dir:
             os.makedirs(local_path_dir, exist_ok=True)
 
-        logger.info(f'Running command <{cmd}> with id <{cmd_id}>')
-        r = subprocess.run(cmd, shell=True, check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        logger.info(f'Command <{cmd}> with id <{cmd_id}> was executed')
-        logger.info(r.stdout.decode("utf-8"))
-
+        try:
+            r = subprocess.run(cmd, shell=True, check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60)  # Set an appropriate timeout in seconds
+            logger.info(f'Command <{cmd}> with id <{cmd_id}> was executed')
+            logger.info(r.stdout.decode("utf-8"))
+        except subprocess.TimeoutExpired:
+            logger.info(f'Command timed out: <{cmd}> with id <{cmd_id}>')
+        
         if r.returncode != 0:
             logger.error('Command returned {}, a {}'.format(r, type(r)))
             logger.error(r.stdout.decode("utf-8"))
