@@ -162,6 +162,8 @@ for label in resource_labels:
     
     executors.append(
         HighThroughputExecutor(
+	    interchange_port_range = (50000, 55500),
+	    worker_port_range = (50000, 55500),
             worker_ports=((
                 resource_inputs['resource']['ports'][0], 
                 resource_inputs['resource']['ports'][1]
