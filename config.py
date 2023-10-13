@@ -173,7 +173,7 @@ for label in resource_labels:
             working_dir =  resource_inputs['resource']['jobdir'],
             cores_per_worker = cores_per_worker,
             worker_logdir_root = worker_logdir_root,
-            address = resource_inputs['resource']['publicIp'].split('@')[1],
+            address = resource_inputs['resource']['privateIp'],
             provider = provider,
             storage_access = storage_access,
             launch_cmd='process_worker_pool.py {debug} {max_workers} -a '+hostname+' -p {prefetch_capacity} -c {cores_per_worker} -m {mem_per_worker} --poll {poll_period} --task_port={task_port} --result_port={result_port} --logdir={logdir} --block_id={{block_id}} --hb_period={heartbeat_period} {address_probe_timeout_string} --hb_threshold={heartbeat_threshold} --cpu-affinity {cpu_affinity} --available-accelerators {accelerators} --start-method {start_method}'
