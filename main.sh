@@ -54,6 +54,8 @@ bash ${PU_DIR}/prepare_resources.sh
 # - Only supported for a single executor
 number_of_executors=$(ls -d  resources/*/ | tr ' ' '\n' | sed "s|resources/||g" | sed "s|/||g" | wc -l)
 if [ ${number_of_executors} -eq 1 ]; then
+    workflow_name=$(pwd | rev | cut -d'/' -f2 | rev)
+    sed -i "s/__WORKFLOW_NAME__/${workflow_name}/g" ${PU_DIR}/service.json
     cp ${PU_DIR}/service.json service.json
 else
     echo "Parsl monitoring is not currently supported for more than one executor"
