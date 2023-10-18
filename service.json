@@ -1,7 +1,7 @@
 {
     "URL": "/me",
     "PORT": "55555",
-    "SLUG": "workflow/__JOBID__\"",
+    "SLUG": "workflow/__WORKFLOW_NAME__\"",
     "JOB_STATUS": "Running",
     "ERROR_MESSAGE": "__ERROR_MESSAGE__"
 }
