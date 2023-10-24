@@ -38,7 +38,7 @@ def get_stage_out_cmd(file, jumphost = None):
 
     return cmd
 
-class PWRSyncStaging(pwstaging.PWStaging, head_node_private_ip):
+class PWRSyncStaging(pwstaging.PWStaging, head_node_private_ip = None):
     """
     This is a modification of the official staging provider 
     https://parsl.readthedocs.io/en/latest/stubs/parsl.data_provider.rsync.RSyncStaging.html
@@ -62,6 +62,11 @@ class PWRSyncStaging(pwstaging.PWStaging, head_node_private_ip):
     prefixed with ssh -J and this approach works even if the Parsl
     app is for some reason running on the head node itself instead
     of the worker nodes.
+
+    The default value is set to None which will disable the use of
+    ssh -J and assume that the node that is running the rsync command
+    has direct ssh access to the host the workflow configuration is
+    pointing to.
     """
 
     def __init__(self, executor_label, logging_level = logging.INFO):
