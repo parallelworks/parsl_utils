@@ -38,7 +38,7 @@ def get_stage_out_cmd(file, jumphost = None):
 
     return cmd
 
-class PWRSyncStaging(pwstaging.PWStaging, head_node_private_ip = None):
+class PWRSyncStaging(pwstaging.PWStaging, head_node_private_ip):
     """
     This is a modification of the official staging provider 
     https://parsl.readthedocs.io/en/latest/stubs/parsl.data_provider.rsync.RSyncStaging.html
