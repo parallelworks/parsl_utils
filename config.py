@@ -117,7 +117,8 @@ for label in resource_labels:
     # Data provider:
     # One instance per executor
     storage_access = [ 
-        PWRSyncStaging(label),
+        PWRSyncStaging(label, 
+	    head_node_private_ip=resource_inputs['resource']['privateIp']),
         PWGsutil(label),
         PWS3(label)
     ]
