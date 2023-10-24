@@ -38,7 +38,7 @@ def get_stage_out_cmd(file, jumphost = None):
 
     return cmd
 
-class PWRSyncStaging(pwstaging.PWStaging, head_node_private_ip):
+class PWRSyncStaging(pwstaging.PWStaging):
     """
     This is a modification of the official staging provider 
     https://parsl.readthedocs.io/en/latest/stubs/parsl.data_provider.rsync.RSyncStaging.html
@@ -69,20 +69,21 @@ class PWRSyncStaging(pwstaging.PWStaging, head_node_private_ip):
     pointing to.
     """
 
-    def __init__(self, executor_label, logging_level = logging.INFO):
+    def __init__(self, executor_label, head_node_private_ip = None, logging_level = logging.INFO):
         self.executor_label = executor_label
         self.logging_level = logging_level
         super().__init__('file', executor_label, logging_level = logging_level)
+        self.head_node_private_ip = head_node_private_ip
 
     def replace_task(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
-        cmd = get_stage_in_cmd(file, jumphost = head_node_private_ip)
+        cmd = get_stage_in_cmd(file, jumphost = self.head_node_private_ip)
         cmd_id = self._get_cmd_id(cmd)  
         return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd, cmd_id, self.logger.getEffectiveLevel())
     
     def replace_task_stage_out(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
-        cmd = get_stage_out_cmd(file, jumphost = head_node_private_ip)
+        cmd = get_stage_out_cmd(file, jumphost = self.head_node_private_ip)
         cmd_id = self._get_cmd_id(cmd)  
         cmd_id = self._get_cmd_id(cmd)  
         return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd, cmd_id, self.logger.getEffectiveLevel())
