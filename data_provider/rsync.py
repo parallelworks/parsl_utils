@@ -62,12 +62,19 @@ class PWRSyncStaging(pwstaging.PWStaging):
 
     def replace_task(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
-        cmd = get_stage_in_cmd(file, jumphost = dm.dfk.executors[executor].address)
+        #cmd = get_stage_in_cmd(file, jumphost = dm.dfk.executors[executor].address)
+        # Get private IP address of head node from the launch_cmd
+        # Need to parse the -a {address} option (so the address itself is
+        # first after the split) and then split again to discard the rest of the options.
+        cmd = get_stage_in_cmd(file, jumphost = dm.dfk.executors[executor].launch_cmd.split('-a')[1].split('-')[0])
         cmd_id = self._get_cmd_id(cmd)  
         return pwstaging.in_task_stage_in_cmd_wrapper(f, file, working_dir, cmd, cmd_id, self.logger.getEffectiveLevel())
     
     def replace_task_stage_out(self, dm, executor, file, f):
         working_dir = dm.dfk.executors[executor].working_dir
-        cmd = get_stage_out_cmd(file, jumphost = dm.dfk.executors[executor].address)
+        #cmd = get_stage_out_cmd(file, jumphost = dm.dfk.executors[executor].address)
+        # See comments in replace_task, above.
+        cmd = get_stage_out_cmd(file, jumphost = dm.dfk.executors[executor].launch_cmd.split('-a')[1].split('-')[0])
+        cmd_id = self._get_cmd_id(cmd)  
         cmd_id = self._get_cmd_id(cmd)  
         return pwstaging.in_task_stage_out_cmd_wrapper(f, file, working_dir, cmd, cmd_id, self.logger.getEffectiveLevel())
