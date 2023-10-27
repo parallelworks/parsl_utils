@@ -117,7 +117,8 @@ for label in resource_labels:
     # Data provider:
     # One instance per executor
     storage_access = [ 
-        PWRSyncStaging(label),
+        PWRSyncStaging(label, 
+	    resource_inputs['resource']['privateIp']),
         PWGsutil(label),
         PWS3(label)
     ]
@@ -173,9 +174,10 @@ for label in resource_labels:
             working_dir =  resource_inputs['resource']['jobdir'],
             cores_per_worker = cores_per_worker,
             worker_logdir_root = worker_logdir_root,
-            address = resource_inputs['resource']['privateIp'],
+            address = '*', #resource_inputs['resource']['privateIp'],
             provider = provider,
-            storage_access = storage_access
+            storage_access = storage_access,
+            launch_cmd='process_worker_pool.py {debug} {max_workers} -a '+resource_inputs['resource']['privateIp']+' -p {prefetch_capacity} -c {cores_per_worker} -m {mem_per_worker} --poll {poll_period} --task_port={task_port} --result_port={result_port} --logdir={logdir} --block_id={{block_id}} --hb_period={heartbeat_period} {address_probe_timeout_string} --hb_threshold={heartbeat_threshold} --cpu-affinity {cpu_affinity}'
         )
     )
     
