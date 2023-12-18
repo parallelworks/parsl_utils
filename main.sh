@@ -1,15 +1,24 @@
 #!/bin/bash
 date
+export PU_DIR=parsl_utils #$(dirname $0)
 
 source /etc/profile.d/parallelworks.sh
 source /etc/profile.d/parallelworks-env.sh
 source /pw/.miniconda3/etc/profile.d/conda.sh
 conda activate
 
-python /swift-pw-bin/utils/input_form_resource_wrapper.py
+if [ -f "/swift-pw-bin/utils/input_form_resource_wrapper.py" ]; then
+    version=$(cat /swift-pw-bin/utils/input_form_resource_wrapper.py | grep VERSION | cut -d':' -f2)
+    if [ -z "$version" ] || [ "$version" -lt 14 ]; then
+        python ${PU_DIR}/input_form_resource_wrapper.py
+    else
+        python /swift-pw-bin/utils/input_form_resource_wrapper.py
+    fi
+else
+    python utils/input_form_resource_wrapper.py
+fi
 
 source inputs.sh
-export PU_DIR=parsl_utils #$(dirname $0)
 source ${PU_DIR}/utils.sh
 source ${PU_DIR}/set_up_conda_from_yaml.sh
 
