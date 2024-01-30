@@ -15,7 +15,7 @@ if [ -f "/swift-pw-bin/utils/input_form_resource_wrapper.py" ]; then
         python /swift-pw-bin/utils/input_form_resource_wrapper.py
     fi
 else
-    python utils/input_form_resource_wrapper.py
+    python ${PU_DIR}/input_form_resource_wrapper.py
 fi
 
 source inputs.sh
