@@ -14,23 +14,14 @@ def get_stage_in_cmd(file, ssh_usercontainer_options = None):
     
     return cmd
 
-def get_stage_out_cmd(file, jumphost = None):
-    if jumphost:
-        cmd = "rsync -avzq -e 'ssh -J {jumphost}' --rsync-path=\"mkdir -p {root_path} && rsync\" {worker_filepath} {hostname}:{permanent_filepath}".format(
-            jumphost = jumphost,
-            hostname = file.netloc,
-            permanent_filepath = file.path,
-            worker_filepath = file.local_path,
-            root_path = os.path.dirname(file.path)
-        )
-    else:
-        cmd = "rsync -avzq --rsync-path=\"mkdir -p {root_path} && rsync\" {worker_filepath} {hostname}:{permanent_filepath}".format(
-            hostname = file.netloc,
-            permanent_filepath = file.path,
-            worker_filepath = file.local_path,
-            root_path = os.path.dirname(file.path)
-        )
-
+def get_stage_out_cmd(file, ssh_usercontainer_options = None):
+    cmd = "rsync -avzq -e 'ssh -J {ssh_usercontainer_options}' --rsync-path=\"mkdir -p {root_path} && rsync\" {worker_filepath} {hostname}:{permanent_filepath}".format(
+        ssh_usercontainer_options = ssh_usercontainer_options,
+        hostname = file.netloc,
+        permanent_filepath = file.path,
+        worker_filepath = file.local_path,
+        root_path = os.path.dirname(file.path)
+    )
     return cmd
 
 class PWRSyncStaging(pwstaging.PWStaging):
