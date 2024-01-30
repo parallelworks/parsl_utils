@@ -5,7 +5,7 @@ from . import pwstaging
 
 def get_stage_in_cmd(file, ssh_usercontainer_options = None):
     
-    cmd = "rsync -avzq  -e '{ssh_usercontainer_options}' {hostname}:{permanent_filepath} {worker_filepath}".format(
+    cmd = "rsync -avzq  -e 'ssh {ssh_usercontainer_options}' {hostname}:{permanent_filepath} {worker_filepath}".format(
         ssh_usercontainer_options = ssh_usercontainer_options,
         hostname = file.netloc,
         permanent_filepath = file.path,
@@ -15,7 +15,7 @@ def get_stage_in_cmd(file, ssh_usercontainer_options = None):
     return cmd
 
 def get_stage_out_cmd(file, ssh_usercontainer_options = None):
-    cmd = "rsync -avzq -e 'ssh -J {ssh_usercontainer_options}' --rsync-path=\"mkdir -p {root_path} && rsync\" {worker_filepath} {hostname}:{permanent_filepath}".format(
+    cmd = "rsync -avzq -e 'ssh {ssh_usercontainer_options}' --rsync-path=\"mkdir -p {root_path} && rsync\" {worker_filepath} {hostname}:{permanent_filepath}".format(
         ssh_usercontainer_options = ssh_usercontainer_options,
         hostname = file.netloc,
         permanent_filepath = file.path,
