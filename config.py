@@ -115,8 +115,7 @@ for label in resource_labels:
     # Data provider:
     # One instance per executor
     storage_access = [ 
-        PWRSyncStaging(label, 
-	    resource_inputs['resource']['privateIp']),
+        PWRSyncStaging(label, resource_inputs['resource']['ssh_usercontainer_options']),
         PWGsutil(label),
         PWS3(label)
     ]
