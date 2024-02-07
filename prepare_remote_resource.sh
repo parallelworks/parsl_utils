@@ -62,7 +62,7 @@ f_set_up_conda_from_yaml ${worker_conda_dir} ${worker_conda_env} ${worker_path}
 env | grep bootstrap_conda_yaml | while IFS= read -r line; do
     # Do something with each line, for example, printing it
     pw_path=$(echo "${line}" | cut -d'=' -f2)
-    worker_path=(copy_pw_job_file ${pw_path})
+    worker_path=$(copy_pw_job_file ${pw_path})
     conda_env=$(echo "${line}" | cut -d'=' -f1 | sed "s/_bootstrap_conda_yaml//g")
     f_set_up_conda_from_yaml ${worker_conda_dir} ${conda_env} ${worker_path}
 done
