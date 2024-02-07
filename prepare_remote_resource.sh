@@ -55,7 +55,7 @@ if ! [ -z "${WORKFLOW_APPS_PY}" ]; then
 fi
 
 # SET UP WORKER CONDA FROM YAML
-worker_path=(copy_pw_job_file ${worker_conda_yaml})
+worker_path=$(copy_pw_job_file ${worker_conda_yaml})
 f_set_up_conda_from_yaml ${worker_conda_dir} ${worker_conda_env} ${worker_path}
 
 # INSTALL OTHER YAML FILES
