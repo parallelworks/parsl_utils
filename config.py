@@ -45,9 +45,18 @@ job_name = '-'.join(os.getcwd().split('/')[-2:])
 # Find all resource labels
 with open('inputs.json') as inputs_json:
     form_inputs = json.load(inputs_json)
-        
-resource_labels = [label.replace('pwrl_','') for label in form_inputs.keys() if label.startswith('pwrl_')]    
 
+resource_labels = []
+for label in form_inputs.keys():
+    if label.startswith('pwrl_'):
+        resource_labels.append(label.replace('pwrl_',''))
+    
+for label in resource_labels:
+    del form_inputs['pwrl_' + label]
+    with open(os.path.join('resources',label,'inputs.json')) as inputs_json:
+        form_inputs[label] = json.load(inputs_json)
+
+#
 # Need to name the job to be able to remove it with clean_resources.sh!
 job_name = '-'.join(os.getcwd().split('/')[-2:])
 
