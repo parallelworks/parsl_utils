@@ -48,10 +48,10 @@ mkdir -p ${resource_jobdir}
 # COPY REQUIRED FILES FROM PW
 # - These are required for parsl to start, therefore, parsl cannot transfer them
 if ! [ -z "${PARSL_UTILS_DIR}" ]; then
-    rsync -avzq ${USER_CONTAINER_HOST}:${PARSL_UTILS_DIR} ${resource_jobdir}
+    rsync -avzq  -e "ssh ${RESOURCE_SSH_USERCONTAINER_OPTIONS}" ${USER_CONTAINER_HOST}:${PARSL_UTILS_DIR} ${resource_jobdir}
 fi
 if ! [ -z "${WORKFLOW_APPS_PY}" ]; then
-    scp ${USER_CONTAINER_HOST}:${WORKFLOW_APPS_PY} ${resource_jobdir}/workflow_apps.py
+    rsync -avzq  -e "ssh ${RESOURCE_SSH_USERCONTAINER_OPTIONS}" ${USER_CONTAINER_HOST}:${WORKFLOW_APPS_PY} ${resource_jobdir}/workflow_apps.py
 fi
 
 # SET UP WORKER CONDA FROM YAML
