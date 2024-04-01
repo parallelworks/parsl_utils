@@ -77,7 +77,7 @@ if [ -z "${PW_WORKER_PORT_1}" ] || [ -z "${PW_WORKER_PORT_2}" ]; then
 fi
 
 # User ports don't work!
-ssh -vvv -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -fN \
+ssh -vvv  ${RESOURCE_SSH_USERCONTAINER_OPTIONS} -fN \
     -L 0.0.0.0:${PW_WORKER_PORT_1}:localhost:${PW_WORKER_PORT_1} \
     -L 0.0.0.0:${PW_WORKER_PORT_2}:localhost:${PW_WORKER_PORT_2} \
     ${USER_CONTAINER_HOST} &> ~/.ssh/parsl_utils.ssh.tunnel.log
