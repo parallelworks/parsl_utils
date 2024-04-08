@@ -9,7 +9,7 @@ getOpenPort() {
     minPort=50000
     maxPort=50500
 
-    openPort=$(curl -s "https://${PARSL_CLIENT_HOST}/api/v2/usercontainer/getSingleOpenPort?minPort=${minPort}&maxPort=${maxPort}&key=${PW_API_KEY}")
+    openPort=$(curl -s "https://${PARSL_CLIENT_HOST}/api/v2/usercontainer/getSingleOpenPort?minPort=${minPort}&maxPort=${maxPort}"  -H "Authorization: Basic $(echo ${PW_API_KEY}|base64)")
     # Check if openPort variable is a port
     if ! [[ ${openPort} =~ ^[0-9]+$ ]] ; then
         qty=1
