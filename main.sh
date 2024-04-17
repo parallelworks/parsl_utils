@@ -7,15 +7,19 @@ source /etc/profile.d/parallelworks-env.sh
 source /pw/.miniconda3/etc/profile.d/conda.sh
 conda activate
 
-if [ -f "/swift-pw-bin/utils/input_form_resource_wrapper.py" ]; then
-    version=$(cat /swift-pw-bin/utils/input_form_resource_wrapper.py | grep VERSION | cut -d':' -f2)
-    if [ -z "$version" ] || [ "$version" -lt 16 ]; then
-        python ${PU_DIR}/input_form_resource_wrapper.py
-    else
-        python /swift-pw-bin/utils/input_form_resource_wrapper.py
-    fi
+if [ -z "${workflow_utils_branch}" ]; then
+    # If empty, clone the main default branch
+    git clone https://github.com/parallelworks/workflow-utils.git
 else
-    python ${PU_DIR}/input_form_resource_wrapper.py
+    # If not empty, clone the specified branch
+    git clone -b "$workflow_utils_branch" https://github.com/parallelworks/workflow-utils.git
+fi
+
+python workflow-utils/input_form_resource_wrapper.py
+
+if [ $? -ne 0 ]; then
+    echo "ERROR - Resource wrapper failed"
+    exit 1
 fi
 
 source inputs.sh
